@@ -1,12 +1,15 @@
 import scrapy
 import json
 from scrapy import Request
+from scrappers.items import Product
 
 class ArgosSpider(scrapy.Spider):
     name = "argos"
     allowed_domains = ["argos.co.uk"]
     start_urls = ["https://www.argos.co.uk/"]
-
+    custom_settings = {
+        "RETRY_HTTP_CODES": [403]
+    }
     def parse(self, response):
         script = response.css('#header-wrapper > script::text').get()
         categories = script.replace("window.__INITIAL_HEADER_STATE__ = ","").replace(";",'')
@@ -24,3 +27,32 @@ class ArgosSpider(scrapy.Spider):
         sub_cats = response.css('li[data-el="category-item"] a::text').getall()
         for sub_cat in sub_cats:
             self.logger.info(f"New Category found {sub_cat}")
+            sub_cats = response.css('li[data-el="category-item"] a::attr(href)').getall()
+            for link in sub_cats:
+                url = f"https://www.argos.co.uk{link}"
+                yield Request(url, self.parse_products)
+        
+    def parse_products(self, response):
+        data = response.css("#__NEXT_DATA__::text").get()
+        products = []
+        if data:
+            products = json.loads(data)["props"]["pageProps"]["productData"]
+        else:
+            data = response.xpath("//script[contains(text(), 'window.App')]//text()").get()
+            products = json.loads(data)['redux']['product']['products']
+        
+        for product in products:
+            item = Product()
+            item['name'] = product['attributes']['name']
+            ean = list(filter(lambda x: x['name'] == "EAN" ,product['attributes']['detailAttributes']))
+            if len(ean):
+                item['ean'] = ean[0]['value']
+            item['url'] = f"https://www.argos.co.uk/product/{product['attributes']['productId']}"
+            item['image'] = f"https://media.4rgos.it/s/Argos/{product['attributes']['productId']}_R_SET?w=270&h=270&qlt=75&fmt=webp"
+            item['now_price'] = product['attributes']['price']
+            item['was_price'] = product['attributes']['wasPrice']
+            if item['was_price'] > 0:
+                drop = ((item['was_price'] - item['now_price']) / item['was_price']) * 100
+                item['price_drop'] = drop
+            item['promotion'] = product['attributes']["specialOfferText"]
+            yield item
