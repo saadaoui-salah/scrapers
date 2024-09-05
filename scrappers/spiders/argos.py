@@ -2,6 +2,7 @@ import scrapy
 import json
 from scrapy import Request
 from scrappers.items import Product
+import math
 
 class ArgosSpider(scrapy.Spider):
     name = "argos"
@@ -35,12 +36,20 @@ class ArgosSpider(scrapy.Spider):
     def parse_products(self, response):
         data = response.css("#__NEXT_DATA__::text").get()
         products = []
+
         if data:
-            products = json.loads(data)["props"]["pageProps"]["productData"]
+            data = json.loads(data)["props"]["pageProps"]
+            products = data["productData"]
+            if data["productMetadata"]['totalPages'] > data["productMetadata"]['currentPage']:
+                yield Request(f"{response.url}opt/page:{data['productMetadata']['currentPage']+1}/") 
         else:
             data = response.xpath("//script[contains(text(), 'window.App')]//text()").get()
-            products = json.loads(data)['redux']['product']['products']
-        
+            data = json.loads(data)['redux']['product']
+            products = data['products']
+            pages = math.ceil(data['numberOfResults']/data['pageSize'])
+            if data['currentPage'] < pages:
+                yield Request(f"{response.url}opt/page:{data['currentPage']+1}/") 
+
         for product in products:
             item = Product()
             item['name'] = product['attributes']['name']
