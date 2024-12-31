@@ -47,7 +47,8 @@ class ServiceseekingSpider(scrapy.Spider):
             services = []
             services += response.css('#profile-services .panel-body a::text').getall()
             services += response.css('#profile-services .panel-body div::text').getall()
-
+            email_pattern = r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'
+            
             item = Service()
             item['business_name'] = response.css('div[itemprop="name"]::text').get()
             item['trade_type'] = response.meta['trade']
