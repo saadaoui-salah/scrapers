@@ -19,19 +19,29 @@ class ServiceseekingSpider(scrapy.Spider):
                     yield Request(
                         url=f'https://www.serviceseeking.com.au{slug}',
                         callback=self.parse_results,
-                        meta={'category': cat.css('a::text').get(), 'trade': keyword}
+                        meta={'category': cat.css('a::text').get(), 'trade': keyword, 'url': f'https://www.serviceseeking.com.au{slug}'}
                     )
+            
 
     def parse_results(self, response):
         cards = response.css('.mbd-card')
         for card in cards:
-            slug = card.css(' .card-content.card-pad-md.visible-xs a::attr(href)').get()
+            slug = card.css('.card-content.card-pad-md.visible-xs a::attr(href)').get()
             url = f"https://www.serviceseeking.com.au{slug}"
             yield Request(
                 url=url,
                 callback=self.parse_details,
                 meta=response.meta
             )
+        if response.css('#view-more-business-cards').get():
+            page = response.meta.get('page', 1) + 1
+            response.meta['page'] = page
+            yield Request(
+                url=f"{url}?page={page}",
+                callback=self.parse_results,
+                meta=response.meta
+            )
+        
             
     def parse_details(self, response):
             awards = []
@@ -48,7 +58,6 @@ class ServiceseekingSpider(scrapy.Spider):
             services += response.css('#profile-services .panel-body a::text').getall()
             services += response.css('#profile-services .panel-body div::text').getall()
             email_pattern = r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'
-            
             item = Service()
             item['business_name'] = response.css('div[itemprop="name"]::text').get()
             item['trade_type'] = response.meta['trade']
@@ -59,7 +68,7 @@ class ServiceseekingSpider(scrapy.Spider):
             item['email'] = emails[0] if emails else ''
             item['social_media'] = ''
             item['category'] = response.meta['category']
-            item['location'] = response.css('.row .text-copy-2.font-14::text').getall()[3]
+            item['location'] = response.css('.row .text-copy-2.font-14::text').getall()[1]
             item['contact_information'] = ''
             item['reviews'] = response.css('.js-scroll-to-reviews::text').get()
             item['rating_avg'] = response.css('.star-rating-sm::text').get()
@@ -67,7 +76,7 @@ class ServiceseekingSpider(scrapy.Spider):
             item['specializations'] = response.meta['category']
             item['service_area'] = ''
             item['awards'] = awards
-            item['website'] = response.css('a[itemprop="url"].flat-link::attr(href)').get
+            item['website'] = response.css('a[itemprop="url"].flat-link::attr(href)').get()
             item['response_time'] = response_time
             item['availability'] = ''
             item['equipment_provided'] = ''
