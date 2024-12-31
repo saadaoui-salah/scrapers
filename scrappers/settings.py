@@ -8,7 +8,7 @@
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 BOT_NAME = "scrappers"
-
+DOWNLOADER_CLIENT_TLS_METHOD = 'TLS'
 SPIDER_MODULES = ["scrappers.spiders"]
 NEWSPIDER_MODULE = "scrappers.spiders"
 
