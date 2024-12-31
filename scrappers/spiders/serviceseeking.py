@@ -51,7 +51,7 @@ class ServiceseekingSpider(scrapy.Spider):
             item = Service()
             item['business_name'] = response.css('div[itemprop="name"]::text').get()
             item['trade_type'] = response.meta['trade']
-            item['description'] = remove_tags(respons.css('#about-us').get(''))
+            item['description'] = remove_tags(response.css('#about-us').get(''))
             item['abn'] = response.css('.abn-number-link a::attr(href)').get('').split('SearchText=')[-1]
             item['license_number'] = ''
             emails = re.findall(email_pattern, item['description'])
