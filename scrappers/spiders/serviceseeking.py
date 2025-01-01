@@ -37,7 +37,7 @@ class ServiceseekingSpider(scrapy.Spider):
             page = response.meta.get('page', 1) + 1
             response.meta['page'] = page
             yield Request(
-                url=f"{url}?page={page}",
+                url=f"{response.meta['url']}?page={page}",
                 callback=self.parse_results,
                 meta=response.meta
             )
