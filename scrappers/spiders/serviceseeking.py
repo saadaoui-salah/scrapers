@@ -20,6 +20,7 @@ class ServiceseekingSpider(scrapy.Spider):
                     yield Request(
                         url=f'https://www.serviceseeking.com.au{slug}',
                         callback=self.parse_results,
+                        dont_filter=True,
                         meta={'category': cat.css('a::text').get(), 'trade': val, 'url': f'https://www.serviceseeking.com.au{slug}'}
                     )
             
@@ -31,6 +32,7 @@ class ServiceseekingSpider(scrapy.Spider):
             url = f"https://www.serviceseeking.com.au{slug}"
             yield Request(
                 url=url,
+                dont_filter=True,
                 callback=self.parse_details,
                 meta=response.meta
             )
@@ -40,6 +42,7 @@ class ServiceseekingSpider(scrapy.Spider):
             yield Request(
                 url=f"{response.meta['url']}?page={page}",
                 callback=self.parse_results,
+                dont_filter=True,
                 meta=response.meta
             )
         
