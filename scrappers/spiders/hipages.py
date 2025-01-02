@@ -72,24 +72,24 @@ class HipagesSpider(scrapy.Spider):
     def parse_details(self, response):
         data = response.xpath('//script[contains(text(), "__INITIAL_PROPS__")]//text()').get()
         data = data.replace(' window.__INITIAL_PROPS__=', '')
-        _, data = json.loads(data).items()
-        data = data[0]['site']
-        sec_data = data[1]
+        data = json.loads(json.loads(data))
+        data = list(data.values())
+        pri_data = data[1]['site'] if 'page' not in list(data[1].keys()) else data[0]['site']
+        sec_data = data[1] if 'page' in list(data[1].keys()) else data[0]
         item = Service()
-        item['business_name'] = data['name']
-        item['abn'] = data['abn']
+        item['business_name'] = pri_data['name']
+        item['abn'] = pri_data['abn']
         item['trade_type'] = response.meta['keyword']
         item['description'] = unescape(remove_tags(sec_data['page']['description']))
-        item['email'] = data['page']['email']
+        item['email'] = sec_data['page']['email']
         item['category'] = response.meta['dir']
-        item['location'] = data['address']
-        item['contact_information'] = data['']
-        item['reviews'] = data['rating']['ratings']
-        item['rating_avg'] = data['rating']['star_rating']
+        item['location'] = pri_data['address']
+        item['reviews'] = pri_data['rating']['ratings']
+        item['rating_avg'] = pri_data['rating']['star_rating']
         item['website'] = response.css('a[data-ga-action="Click tradie website"]::attr(href)').get()
         item['current_url'] = response.url
         yield Request(
-            url=self.phone_number_api.format(data['page']['mobile']),
+            url=self.phone_number_api.format(sec_data['page']['mobile']),
             callback=self.parse_phone,
             meta={'item': item},
         )
