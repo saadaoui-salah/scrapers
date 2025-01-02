@@ -49,7 +49,6 @@ class ServiceseekingSpider(scrapy.Spider):
             for badge in response.css('.bio-badge-description'):
                 if 'award' in badge.css('div .bold::text').get('').lower():
                     awards = badge.css('div .pl4::text').get()
-                    print(awards)
             response_time = ''
             for sel in response.css('#profile-about-us .col-xs-12'):
                 if 'response' in sel.css('.bold::text').get('').lower():
