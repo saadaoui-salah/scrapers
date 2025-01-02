@@ -3,6 +3,7 @@ from w3lib.html import remove_tags
 from scrappers.items import Service
 import re
 from scrapy import Request
+from html import unescape
 
 class ServiceseekingSpider(scrapy.Spider):
     name = "serviceseeking"
@@ -11,15 +12,15 @@ class ServiceseekingSpider(scrapy.Spider):
 
     def parse(self, response):
         cats = response.css('.all-categories-container')
-        keywords = ['Fenc','Landscap','Handym','Carpenter']
+        keywords = {'Fenc':['Fencing', 'Fencer'],'Landscap':'Landscaper','Handym':'Handymen','Carpenter':'Carpenter'}
         for cat in cats:
-            for keyword in keywords:
+            for keyword, val in keywords.items():
                 if keyword.lower() in cat.css('a::text').get().lower():
                     slug = cat.css('a::attr(href)').get()
                     yield Request(
                         url=f'https://www.serviceseeking.com.au{slug}',
                         callback=self.parse_results,
-                        meta={'category': cat.css('a::text').get(), 'trade': keyword, 'url': f'https://www.serviceseeking.com.au{slug}'}
+                        meta={'category': cat.css('a::text').get(), 'trade': val, 'url': f'https://www.serviceseeking.com.au{slug}'}
                     )
             
 
@@ -47,8 +48,8 @@ class ServiceseekingSpider(scrapy.Spider):
             awards = []
             for badge in response.css('.bio-badge-description'):
                 if 'award' in badge.css('div .bold::text').get('').lower():
-                    awards = badge.css('pl4::text').get()
-
+                    awards = badge.css('div .pl4::text').get()
+                    print(awards)
             response_time = ''
             for sel in response.css('#profile-about-us .col-xs-12'):
                 if 'response' in sel.css('.bold::text').get('').lower():
@@ -71,10 +72,9 @@ class ServiceseekingSpider(scrapy.Spider):
             item['location'] = response.css('.row .text-copy-2.font-14::text').getall()[1]
             item['contact_information'] = ''
             item['reviews'] = response.css('.js-scroll-to-reviews::text').get()
-            item['rating_avg'] = response.css('.star-rating-sm::text').get()
+            item['rating_avg'] = unescape(response.css('.star-rating-sm::text').get(''))
             item['primary_services'] = services
             item['specializations'] = response.meta['category']
-            item['service_area'] = ''
             item['awards'] = awards
             item['website'] = response.css('a[itemprop="url"].flat-link::attr(href)').get()
             item['response_time'] = response_time
@@ -82,4 +82,5 @@ class ServiceseekingSpider(scrapy.Spider):
             item['equipment_provided'] = ''
             item['experience'] = ''
             item['insurance_coverage'] = ''
+            item['current_url'] = response.url
             yield item

@@ -42,3 +42,4 @@ class Service(scrapy.Item):
     experience = scrapy.Field()
     insurance_coverage = scrapy.Field()
     website = scrapy.Field()
+    current_url = scrapy.Field()
