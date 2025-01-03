@@ -13,7 +13,6 @@ headers = {
     "dnt": "1",
     "if-none-match": 'W/"54e6f-S52/lgP+7jagdfZTWzjiOrt3smU"',
     "priority": "u=0, i",
-    "referer": "https://hipages.com.au/directory",
     "sec-ch-ua": '"Google Chrome";v="129", "Not=A?Brand";v="8", "Chromium";v="129"',
     "sec-ch-ua-mobile": "?0",
     "sec-ch-ua-platform": '"Linux"',
