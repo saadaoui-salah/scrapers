@@ -1,6 +1,8 @@
 from scrapy import Spider, Request, Item, Field
 from urllib.parse import quote
 import ssl
+from scrappers.utils import generate_cookies
+from scrappers.utils import generate_cookies
 
 class ServiceItem(Item):
     # Define fields to store scraped data
@@ -16,12 +18,12 @@ class PagejauneSpider(Spider):
     name = "pagejaune"
     allowed_domains = ["pagesjaunes.fr"]
     # 'Loiret (45)'
-    locations = ['Eure-et-Loir (28)', 'Yonne (89)', 'Aube (10)', 'Marne (51)', 'Ille-et-Vilaine (35)', 'Mayenne (53)']
+    locations = '14-61-27-76-62-80-59-02-60-08-51-55-54-57-67-88-68-52-10-70-21-89-58-71-39-18-41-28-45-03-42-69-01-63-43-77-95-78-91'
     categories = ['Restaurant', 'Electricien', 'Beauté', 'Pharmacie', 'Kiné', 'Taxi', 'Comptable', 'Notaire', 'Plombier',]
     
     def start_requests(self):
         self.cookies = {
-            "cf_clearance": "eZACHT.TQb9LAT1RnkHFa7iBUEqI1qWQrfKVtD7HFmo-1731094418-1.2.1.1-n8z.5yjBFJY7VjOygRlRp98IOks71_alCkK2MYCU5imaQ5nuhSsNm4MsWNwkuV3Qp_gp1Zd0UAFtz6uKjf9LLbrMnGnHcRCARcxSXXA3VFSBK4Sx.fYnBmV2m2PYz9l4Hj.fTSKpDEIUzak6mx6Vsc6xAThddHYV9qN24LUTPOFecnOi6i029vdXAuL.fDsH8bL390CniJRLMbn4cS0GSY7AcALkjzDdhyCZawBrmo5KySfK8fLPKQpu6enjC1DdRnoCNCe9p9JIcA60bRjSk6PMhOJI8bG17itb7I_rhDd9o8vdHRgZT8MpEswMG5S0qPh0gALM2v9qyjk5ETkRLyNUC953u6jlKQGLgYXcDySx31ml3dR4x1XF4HIo8EBJKDEM.mEPwshkeff3eOAcYDu6C19xxVnBYsOpjzu34QQ"
+            "cf_clearance": "B_H5s3Y3W0hrV39wFmO7MEd74gu_0wcp33C5eBdrmxc-1731089075-1.2.1.1-BxrtslHx3VPO7aBZG2cIMDb0._AUrZOC7RPRArmBX40pztDojQrtmezIAYMaEati7dtSTHu_.lkUR5T0ptyjMwSq.41HYwA..mvNOe74j6Dh2GWtHHykPxNdA7OlUKwncaeaaoyCT9KvbBfc449kcPQEDPt0H8EF3Zk7L0gE5hjr5CtRapgL_w1Iy66Nqh_cnLqYG3uWMKQ24_gbWGSbwfFqqiqwJ60e9ccYu5SUwxRfQusoFU2HzS0FxILptlWzh3kl245.ZzB2LU4iqjqpLM_dg19YD575zje.zDX3wcFI7T8quBP2MhFceesbypo4xMWnBEyTma51E5uCcZYlgwh2UkryN.kA3fSy.Bt_PsGkaq2IjnCMhK0jkI4pald4"
         }
         self.headers = {
             "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0",
@@ -35,15 +37,41 @@ class PagejauneSpider(Spider):
             "Sec-Fetch-User": "?1",
             "Te": "trailers"
         }
-        for location in self.locations:
-            for category in self.categories:
-                yield Request(
-                    url=f"https://www.pagesjaunes.fr/annuaire/chercherlespros?quoiqui={quote(category)}&ou={quote(location)}&univers=pagesjaunes&idOu=",
-                    headers=self.headers,
+        for location in self.locations.split('-'):
+            url = f"https://www.pagesjaunes.fr/autocomplete/search/where?query={location}&profile=BROWSING"
+            yield Request(
+                    url=url,
+                    headers = {
+                        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0",
+                        "Accept": "application/json, text/javascript, */*; q=0.01",
+                        "Accept-Language": "en-US,en;q=0.5",
+                        'Referer': 'https://www.pagesjaunes.fr/pagesblanches/recherche?quoiqui=Restaurant&ou=Eure-et-Loir+(28)&univers=pagesblanches&idOu=',
+                        "Accept-Encoding": "gzip, deflate, br",
+                        "X-Requested-With": "XMLHttpRequest",
+                        "Sec-Fetch-Dest": "empty",
+                        "Sec-Fetch-Mode": "cors",
+                        "Sec-Fetch-Site": "same-origin",
+                        "Te": "trailers"
+                    },
                     cookies=self.cookies,
-                    callback=self.parse,
-                    meta={'keyword': self.locations[0], 'category':category}
+                    callback=self.parse_locations,
+                    meta={'loc': location, 'proxy': 'https://127.0.0.1:8080'}
                 )
+
+    def parse_locations(self, response):
+        data = response.json()
+        location = response.meta['loc']
+        for hit in data['hits']:
+            if f"({location})" in hit['label']['value']:
+                for category in self.categories:
+                    yield Request(
+                        url=f"https://www.pagesjaunes.fr/pagesblanches/recherche?quoiqui={quote(category)}&ou={quote(location)}&univers=pagesblanches&idOu=",
+                        headers=self.headers,
+                        cookies=self.cookies,
+                        callback=self.parse,
+                        meta={'keyword': hit['label']['value'], 'category':category, 'proxy': 'https://127.0.0.1:8080'}
+                    )
+                break
 
     def parse(self, response):
         for service in response.css('ul.bi-list > li'):
@@ -55,7 +83,7 @@ class PagejauneSpider(Spider):
             item['category'] = response.meta['category']
             item['url'] = response.url
             item['phone_number'] = service.css('.number-contact > span::text').get()
-            item['address'] = service.css('.bi-address a::text').get().strip()
+            item['address'] = service.css('.bi-address a::text').get('').strip()
             yield item
         next_url = response.css('a.next').get()
         if next_url:
@@ -65,7 +93,7 @@ class PagejauneSpider(Spider):
             contexte = quote(response.css("input[name='contexte']::attr('value')").get())
             idOu = response.css("input[name='idOu']::attr('value')").get()
             page += 1
-            url = f"https://www.pagesjaunes.fr/annuaire/chercherlespros?quoiqui={quoiqui}&ou={ou}&quoiQuiInterprete={quoiQuiInterprete}&contexte={contexte}&idOu={idOu}&page={page}"
+            url = f"https://www.pagesjaunes.fr/pagesblanches/recherche?quoiqui={quoiqui}&ou={ou}&quoiQuiInterprete={quoiQuiInterprete}&contexte={contexte}&idOu={idOu}&page={page}"
             print(f'Movin To Page {page} URL: {url}')
             response.meta['page'] = page
             yield Request(
@@ -73,5 +101,10 @@ class PagejauneSpider(Spider):
                 headers=self.headers,
                 cookies=self.cookies,
                 callback=self.parse,
+                errback=self.errback,
                 meta=response.meta
             )
+
+    def errback(self, failure):
+        self.cookies = generate_cookies(['https://www.pagesjaunes.fr/','https://www.pagesjaunes.fr/pagesblanches/',failure.request.url])
+        yield failure.request.replace(cookies=self.cookies)
