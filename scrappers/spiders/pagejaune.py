@@ -20,9 +20,7 @@ class PagejauneSpider(Spider):
     categories = ['Restaurant', 'Electricien', 'Beauté', 'Pharmacie', 'Kiné', 'Taxi', 'Comptable', 'Notaire', 'Plombier',]
     
     def start_requests(self):
-        self.cookies = {
-            "cf_clearance": "B_H5s3Y3W0hrV39wFmO7MEd74gu_0wcp33C5eBdrmxc-1731089075-1.2.1.1-BxrtslHx3VPO7aBZG2cIMDb0._AUrZOC7RPRArmBX40pztDojQrtmezIAYMaEati7dtSTHu_.lkUR5T0ptyjMwSq.41HYwA..mvNOe74j6Dh2GWtHHykPxNdA7OlUKwncaeaaoyCT9KvbBfc449kcPQEDPt0H8EF3Zk7L0gE5hjr5CtRapgL_w1Iy66Nqh_cnLqYG3uWMKQ24_gbWGSbwfFqqiqwJ60e9ccYu5SUwxRfQusoFU2HzS0FxILptlWzh3kl245.ZzB2LU4iqjqpLM_dg19YD575zje.zDX3wcFI7T8quBP2MhFceesbypo4xMWnBEyTma51E5uCcZYlgwh2UkryN.kA3fSy.Bt_PsGkaq2IjnCMhK0jkI4pald4"
-        }
+        self.cookies = generate_cookies(['https://www.pagesjaunes.fr/','https://www.pagesjaunes.fr/pagesblanches/','https://www.pagesjaunes.fr/pagesblanches/recherche?quoiqui=Restaurant&ou=Eure-et-Loir+(28)&univers=pagesblanches&idOu='])
         self.headers = {
             "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
