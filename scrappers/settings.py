@@ -11,8 +11,9 @@ BOT_NAME = "scrappers"
 DOWNLOADER_CLIENT_TLS_METHOD = 'TLS'
 SPIDER_MODULES = ["scrappers.spiders"]
 NEWSPIDER_MODULE = "scrappers.spiders"
-
-
+DOWNLOADER_MIDDLEWARES = {
+    'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 590,
+}
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = "scrappers (+http://www.yourdomain.com)"
 

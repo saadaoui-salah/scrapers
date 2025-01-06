@@ -43,10 +43,10 @@ class PagejauneSpider(Spider):
                     url=url,
                     headers = {
                         "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0",
-                        "Accept": "application/json, text/javascript, */*; q=0.01",
+                        "Accept": "application/json",
                         "Accept-Language": "en-US,en;q=0.5",
+                        "Accept-Encoding": "identity",
                         'Referer': 'https://www.pagesjaunes.fr/pagesblanches/recherche?quoiqui=Restaurant&ou=Eure-et-Loir+(28)&univers=pagesblanches&idOu=',
-                        "Accept-Encoding": "gzip, deflate, br",
                         "X-Requested-With": "XMLHttpRequest",
                         "Sec-Fetch-Dest": "empty",
                         "Sec-Fetch-Mode": "cors",
@@ -55,7 +55,7 @@ class PagejauneSpider(Spider):
                     },
                     cookies=self.cookies,
                     callback=self.parse_locations,
-                    meta={'loc': location, 'proxy': 'https://127.0.0.1:8080'}
+                    meta={'loc': location}
                 )
 
     def parse_locations(self, response):
@@ -69,7 +69,7 @@ class PagejauneSpider(Spider):
                         headers=self.headers,
                         cookies=self.cookies,
                         callback=self.parse,
-                        meta={'keyword': hit['label']['value'], 'category':category, 'proxy': 'https://127.0.0.1:8080'}
+                        meta={'keyword': hit['label']['value'], 'category':category}
                     )
                 break
 
@@ -94,7 +94,7 @@ class PagejauneSpider(Spider):
             idOu = response.css("input[name='idOu']::attr('value')").get()
             page += 1
             url = f"https://www.pagesjaunes.fr/pagesblanches/recherche?quoiqui={quoiqui}&ou={ou}&quoiQuiInterprete={quoiQuiInterprete}&contexte={contexte}&idOu={idOu}&page={page}"
-            print(f'Movin To Page {page} URL: {url}')
+            print(f'Movin To Page {page} Location: {response.meta["keyword"]} category: {response.meta["category"]}')
             response.meta['page'] = page
             yield Request(
                 url=url,
