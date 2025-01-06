@@ -1,7 +1,5 @@
 from scrapy import Spider, Request, Item, Field
 from urllib.parse import quote
-import ssl
-from scrappers.utils import generate_cookies
 from scrappers.utils import generate_cookies
 
 class ServiceItem(Item):
@@ -107,4 +105,9 @@ class PagejauneSpider(Spider):
 
     def errback(self, failure):
         self.cookies = generate_cookies(['https://www.pagesjaunes.fr/','https://www.pagesjaunes.fr/pagesblanches/',failure.request.url])
-        yield failure.request.replace(cookies=self.cookies)
+        retry = response.meta.get('errback_retry', 1)
+        if retry > 15:
+            response.meta['errback_retry'] = retry + 1
+            yield failure.request.replace(cookies=self.cookies, meta=meta)
+        else:
+            self.logger.error(f'[Errback] Gave Up retry {failure.request.url}')
