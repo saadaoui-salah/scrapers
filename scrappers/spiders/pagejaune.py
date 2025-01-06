@@ -1,7 +1,7 @@
 from scrapy import Spider, Request, Item, Field
 from urllib.parse import quote
 from scrappers.utils import generate_cookies
-
+import os
 class ServiceItem(Item):
     # Define fields to store scraped data
     name = Field()
