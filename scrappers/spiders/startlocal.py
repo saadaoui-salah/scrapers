@@ -114,7 +114,7 @@ class StartlocalSpider(scrapy.Spider):
         item['rating_avg'] = data['rating']
         item['category'] = data['categories']['edges'][0]['parentCategory']['parentCategory']['name']
         item['email'] = data['email']
-        item['current_url'] = f"https://startlocal.com.au/{data['slug']}"
+        item['current_url'] = f"https://startlocal.com.au{data['slug']}"
         item['website'] = data['url']
         item['trade_type'] = response.meta['trade']
         item['description'] = data['about']
