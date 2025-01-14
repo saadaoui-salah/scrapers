@@ -8,14 +8,12 @@ import scrapy
 
 class Product(scrapy.Item):
     # define the fields for your item here like:
-    name = scrapy.Field()
+    title = scrapy.Field()
     url = scrapy.Field()
     image = scrapy.Field()
-    ean = scrapy.Field()
-    now_price = scrapy.Field()
-    was_price = scrapy.Field()
-    price_drop = scrapy.Field()
-    promotion = scrapy.Field()
+    upc = scrapy.Field()
+    price = scrapy.Field()
+    brand = scrapy.Field()
 
 class Service(scrapy.Item):
     # define the fields for your item here like:
