@@ -20,7 +20,7 @@ class ServiceItem(Item):
 
 
 class PagejauneSpider(Spider):
-    logfile = ''.join(open('./page2.log', 'r').readlines()) + ''.join(open('./page.log', 'r').readlines())
+    logfile = ''
     name = "pagejaune"
     allowed_domains = ["pagesjaunes.fr"]
     # 'Loiret (45)'
