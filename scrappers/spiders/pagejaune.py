@@ -18,9 +18,9 @@ class ServiceItem(Item):
     category = Field()
     phone_number = Field()
 
-logfile = ''.join(open('./page2.log', 'r').readlines()) + ''.join(open('./page.log', 'r').readlines())
 
 class PagejauneSpider(Spider):
+    logfile = ''.join(open('./page2.log', 'r').readlines()) + ''.join(open('./page.log', 'r').readlines())
     name = "pagejaune"
     allowed_domains = ["pagesjaunes.fr"]
     # 'Loiret (45)'
