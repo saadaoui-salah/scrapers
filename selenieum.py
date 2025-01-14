@@ -5,10 +5,12 @@ import time
 driver = webdriver.Firefox()
 
 # Open the website
-driver.get('https://www.google.com/')
+driver.get('https://sachane.com/markalar')
 
 # Sleep for 10 seconds
 input()
 
 # Close the browser
 driver.quit()
+
+

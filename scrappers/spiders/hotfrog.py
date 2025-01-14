@@ -43,9 +43,6 @@ class HotfrogSpider(scrapy.Spider):
                 meta=response.meta
             ) 
 
-
-
-
     def parse_results(seelf, response):
         item = response.meta['item']
         item['description'] = remove_tags(response.css('#description').get(''))
