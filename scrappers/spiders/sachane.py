@@ -2,6 +2,8 @@ import scrapy
 from scrapy import Request
 import json
 from scrappers.items import Product
+import math
+
 
 class SachaneSpider(scrapy.Spider):
     name = "sachane"
@@ -18,6 +20,8 @@ class SachaneSpider(scrapy.Spider):
         "Sec-Fetch-User": "?1",
         "Te": "trailers"
     }
+    ITEMS_PER_PAGE = 100
+    api_url = 'https://sch.sachane.com/api.php?_d=Products&sa_mbl=1&subcats=Y&cid={}&items_per_page={}&sort_by=popularity&sort_order=desc&page={}&status=A'
 
     def start_requests(self):
         yield Request(
@@ -32,11 +36,12 @@ class SachaneSpider(scrapy.Spider):
         categories = list(categories.values())
         for list_ in categories:
             for category in list_:
-                url = f'https://sch.sachane.com/api.php?_d=Products&sa_mbl=1&subcats=Y&cid={category["category_id"]}&items_per_page=12&sort_by=popularity&sort_order=desc&page=1&status=A'
+                url = self.api_url.format(category["category_id"], self.ITEMS_PER_PAGE, 1)
                 yield Request(
                     url=url,
                     callback=self.parse_products,
-                    headers=self.headers
+                    headers=self.headers,
+                    meta={'category_id': category['category_id']}
                 )
     
     def parse_products(self, response):
@@ -55,7 +60,16 @@ class SachaneSpider(scrapy.Spider):
                 headers=self.headers,
                 meta={'item': item}
             )
-    
+        if (pages := int(data['params']['total_items'])) > self.ITEMS_PER_PAGE and response.meta.get('category_id'):
+            pages = math.ceil(round(int(pages)/self.ITEMS_PER_PAGE))
+            for i in range(1, pages):
+                url = self.api_url.format(response.meta["category_id"],self.ITEMS_PER_PAGE, i+1)
+                yield Request(
+                    url=url,
+                    callback=self.parse_products,
+                    headers=self.headers,
+                )
+        
     def parse_pdp(self, response):
         data = json.loads(response.css("#__NEXT_DATA__::text").get())
         item = response.meta['item']
