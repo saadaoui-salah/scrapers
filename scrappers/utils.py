@@ -144,5 +144,5 @@ file_pattern = "./client-data/*.csv"
     # List all files matching the pattern
 file_list = ['./client-data/hot.csv', './client-data/serviceseeking.csv', './client-data/truelocal.csv', './client-data/start.csv', './client-data/gumtree.csv', './client-data/hipages.csv']
 
-for f in file_list:
-    insert_csv_to_db(f)
+#for f in file_list:
+#    insert_csv_to_db(f)

@@ -1,5 +1,10 @@
+.PHONY: run
 
-file_name = handyman-20.csv
 
 run:
-	echo "" > yellow.log && scrapy crawl yellowpages --logfile yellow.log -o $(file_name) 
+	@echo "" > $(spider).log
+	@echo "" > $(spider).csv
+	@scrapy crawl $(spider) --logfile $(spider).log -o $(spider).csv
+
+gen:
+	@scrapy genspider $(spider) $(spider).$(name)  
