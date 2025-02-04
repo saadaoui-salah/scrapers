@@ -269,7 +269,4 @@ class AtlantacutlerySpider(scrapy.Spider):
                     item['quantity'] = 1
                 else:
                     item['quantity'] = 5
-            else:
-                print(item['url'], product['stock'])
-                print(product['product_id'], response.meta['id'])
-        yield item
+                yield item
