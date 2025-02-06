@@ -128,10 +128,20 @@ class CollectorsarmourySpider(scrapy.Spider):
         item['description'] = remove_tags(response.css('#productDescription').get('')).replace('\r','').replace('\n','').strip()
         item['quantity'] = quantity 
         item['price'] = response.css('.productView-price .price-primary::text').get()
-        item['MSRP'] = response.css('.productView-price [data-product-rrp-price-without-tax]::text').get().replace('\r','').replace('\n','').strip()
         item['url'] = response.url
         item['category'] = response.meta['path']
         for i, image in enumerate(images):
             item[f'image_{i+1}'] = image
+        response.meta['item'] = item
+        yield Request(
+                url=response.url,
+                meta=response.meta,
+                cookies={},
+                dont_filter=True,
+                callback=self.parse_msrp
+            )
 
+    def parse_msrp(self, response):
+        item = response.meta['item']    
+        item['MSRP'] = response.css('.productView-price [data-product-rrp-price-without-tax]::text').get().replace('\r','').replace('\n','').strip()
         yield item
