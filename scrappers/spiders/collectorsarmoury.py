@@ -85,6 +85,7 @@ class CollectorsarmourySpider(scrapy.Spider):
                     url=f'{url}?limit=96',
                     callback=self.parse_products,
                     cookies=self.cookies,
+                    dont_filter=True,
                     meta={'path': f'{path_1} > {path_2}'}
                 )
 
@@ -94,6 +95,7 @@ class CollectorsarmourySpider(scrapy.Spider):
                 url=product.get(),
                 cookies=self.cookies,
                 meta=response.meta,
+                dont_filter=True,
                 callback=self.parse_pdp
             )
 
@@ -101,6 +103,7 @@ class CollectorsarmourySpider(scrapy.Spider):
             yield Request(
                 url=next_link,
                 cookies=self.cookies,
+                dont_filter=True,
                 meta=response.meta,
                 callback=self.parse_products
             )
@@ -115,7 +118,7 @@ class CollectorsarmourySpider(scrapy.Spider):
                 Type = response.css('.productView-info > dd::text').getall()[i]
             if title.lower() == 'upc:':
                 upc = response.css('.productView-info > dd::text').getall()[i]
-
+        images = response.css('.productView-images img::attr(src)').getall()
         item = Product()
         item['sku'] = response.css('dd[itemprop="sku"]::text').get().replace('\r','').replace('\n','').strip()
         item['upc'] = upc
@@ -128,4 +131,7 @@ class CollectorsarmourySpider(scrapy.Spider):
         item['MSRP'] = response.css('.productView-price [data-product-rrp-price-without-tax]::text').get().replace('\r','').replace('\n','').strip()
         item['url'] = response.url
         item['category'] = response.meta['path']
+        for i, image in enumerate(images):
+            item[f'image_{i+1}'] = image
+
         yield item
