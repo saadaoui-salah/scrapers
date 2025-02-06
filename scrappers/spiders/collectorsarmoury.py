@@ -51,19 +51,20 @@ class CollectorsarmourySpider(scrapy.Spider):
             "athena_short_visit_id": "effc58c3-131e-4015-a0d2-2fa0468fedf9:1738807353",
             "XSRF-TOKEN": "956c8471a166b83b8763ca3555b2178b6222ed000768e96709b9023f6dac9762",
             "SHOP_SESSION_TOKEN": "d70icuq95jk40ggcdbs18ahu5l",
-            "__cf_bm": "RGLKxM66prxp7mcTXPD.h16KXogzVojcuF0A6aTtZxE-1738807354-1.0.1.1-ySTmN_C_7GXfjDXX07FdOTgkvznDD_UvaVmwKmbXfBUccMVHsZADE92HIWKXogIXCHT7RQ3jnvOM6qey_Lw5Hw",
-            "SHOP_DEVICE_TOKEN": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3Mzg4MDczNzEsImV4cCI6MTc0MTM5OTM3MSwiaXNzIjoiaHR0cHM6Ly9jb2xsZWN0b3JzYXJtb3VyeS5jb20iLCJzdWIiOiJiY2Y2OGQ4Y2JkZjE3Y2MyMjMyYTU3NTQ5OWJhM2UzYmJiYmRjNmYwZDFmNWE2OTA1MjU5ZWRlMzBmOWIwYjE4IiwianRpIjoiNjEwYjYwYmZjYzFmNzdjNWU5N2NhMzM3MjQ4ZDA3Njk2NjZmNjIzOTE2MDdkODMzMDYxOGU5NzQ3OGRmMWNkNiJ9.Zs3PUDOOWP5CIlpqPr3Pynhb9o-v7tKXZ9On4N7ZlRc",
-            "__HOST-SHOP_SESSION_ROTATION_TOKEN": "c1ddfe3dddb37fd7f1a0fd2c878d77cbaeabaa16282b9e37f2825d983b743ab4",
-            "SHOP_SESSION_ROTATION_TOKEN": "c1ddfe3dddb37fd7f1a0fd2c878d77cbaeabaa16282b9e37f2825d983b743ab4",
-            "SHOP_TOKEN": "4ce84fb379c5ccfc047b6502c070c37e5557fd8f63d75928f7f92149e1b2e97a_1739412171",
-            "bc_consent": '{"allow":[2,3,4],"deny":[]}',
+            "bc_consent": "%7B%22allow%22%3A%5B2%2C3%2C4%5D%2C%22deny%22%3A%5B%5D%7D",
             "_gid": "GA1.2.630619838.1738807375",
             "STORE_VISITOR": "1",
             "lastVisitedCategory": "64",
-            "_ga": "GA1.1.1121161553.1738807375",
-            "__kla_id": '{"cid":"YTY3ZjY3ZWtYbU5pWkMwME1EWmhMV0ZoTVRjdE9HTXlZVEpsTlRZM05tTTMi,"$referrer":{"ts":1738427229,"value":"","first_page":"https://collectorsarmoury.com/"},"$last_referrer":{"ts":1738807406,"value":"","first_page":"https://collectorsarmoury.com/login.php"}}',
-            "_ga_5BZMS9JCQ7": "GS1.1.1738807374.1.1.1738807406.0.0.0",
-            "Shopper-Pref": "1765EA98F73564D8C6394D31E884A6E7752E47B3-1739412207535-x{\"cur\":\"USD\"}"
+            "__cf_bm": "aiDhuOVjfcO.K0hSNq_urxYXMOtgJd.Fi2x6VzA2PIw-1738815362-1.0.1.1-Y4uCHquA61H_uMspr6udc1.RoDPGVlDCDMVDzQZ37aeJb8AHN6rv0DFdFrjU2k5nN1bAT_ABot5GlRpzeLF7Vw",
+            "_gat_gtag_UA_1495351_1": "1",
+            "SHOP_DEVICE_TOKEN": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3Mzg4MTU1MjAsImV4cCI6MTc0MTQwNzUyMCwiaXNzIjoiaHR0cHM6Ly9jb2xsZWN0b3JzYXJtb3VyeS5jb20iLCJzdWIiOiJiY2Y2OGQ4Y2JkZjE3Y2MyMjMyYTU3NTQ5OWJhM2UzYmJiYmRjNmYwZDFmNWE2OTA1MjU5ZWRlMzBmOWIwYjE4IiwianRpIjoiYjJhOWE1YWEwNjIzNDI0ZDNkYzg0MGYyZjdkZGQwMDZmY2IyNjE2NTc0NGQ1Nzk1NmY5OWVlNGQ0ZDUwMTU2MSJ9.6oT0IbVFvv-7RNX-44izuZUJcpNrTyYXf7OcVaNB56I",
+            "__HOST-SHOP_SESSION_ROTATION_TOKEN": "9efca3ea131960bd12327c91fda14e14fd5c07690b9f00aecb4c7b98bdf75dda",
+            "SHOP_SESSION_ROTATION_TOKEN": "9efca3ea131960bd12327c91fda14e14fd5c07690b9f00aecb4c7b98bdf75dda",
+            "SHOP_TOKEN": "596bca1df9878109112b2552483bbf56178e95c0889a11d507250f93feebb033_1739420320",
+            "__kla_id": "eyJjaWQiOiJZVFkzWmpZM1pXVXRZbU5pWkMwME1EWmhMV0ZoTVRjdE9HTXlZVEpsTlRZM05tTTMiLCIkcmVmZXJyZXIiOnsidHMiOjE3Mzg0MjcyMjksInZhbHVlIjoiIiwiZmlyc3RfcGFnZSI6Imh0dHBzOi8vY29sbGVjdG9yc2FybW91cnkuY29tLyJ9LCIkbGFzdF9yZWZlcnJlciI6eyJ0cyI6MTczODgxNTUyNiwidmFsdWUiOiIiLCJmaXJzdF9wYWdlIjoiaHR0cHM6Ly9jb2xsZWN0b3JzYXJtb3VyeS5jb20vbG9naW4ucGhwIn19",
+            "Shopper-Pref": "06ABAC5600042BEAF76E39573E5814BE61C25F13-1739420326442-x%7B%22cur%22%3A%22USD%22%7D",
+            "_ga_5BZMS9JCQ7": "GS1.1.1738807374.1.1.1738815526.0.0.0",
+            "_ga": "GA1.1.1121161553.1738807375"
         }
 
         yield Request(
