@@ -38,8 +38,6 @@ class Product(scrapy.Item):
     image_20 = scrapy.Field()
 
 
-from http.cookies import SimpleCookie
-
 class CollectorsarmourySpider(scrapy.Spider):
     name = "collectorsarmoury"
     start_urls = ["https://collectorsarmoury.com"]
@@ -75,7 +73,6 @@ class CollectorsarmourySpider(scrapy.Spider):
         for product in response.css('.card-title a::attr(href)'):
             yield Request(
                 url=product.get(),
-                cookies=self.cookies,
                 meta=response.meta,
                 callback=self.parse_pdp
             )
