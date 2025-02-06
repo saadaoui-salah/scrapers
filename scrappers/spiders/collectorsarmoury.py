@@ -66,10 +66,6 @@ class CollectorsarmourySpider(scrapy.Spider):
                 )
 
     def parse_products(self, response):
-        if '/login.php?action=logout' in response.css('.navPages-item a::attr(href)').getall():
-            print('login')
-        else:
-            print('logout')
         for product in response.css('.card-title a::attr(href)'):
             yield Request(
                 url=product.get(),
