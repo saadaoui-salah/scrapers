@@ -91,7 +91,7 @@ class CollectorsarmourySpider(scrapy.Spider):
                 Type = response.css('.productView-info > dd::text').getall()[i]
             if title.lower() == 'upc:':
                 upc = response.css('.productView-info > dd::text').getall()[i]
-        images = response.css('.productView-images img::attr(src)').getall()
+        images = response.css('.productView-images img::attr(data-src)').getall()
         item = Product()
         item['sku'] = response.css('dd[itemprop="sku"]::text').get().replace('\r','').replace('\n','').strip()
         item['upc'] = upc
