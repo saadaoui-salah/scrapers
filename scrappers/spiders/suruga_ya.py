@@ -35,11 +35,16 @@ class SurugaYaSpider(scrapy.Spider):
                 url=f'https://www.suruga-ya.jp{next_link}',
                 callback=self.parse,
             )
+    def get_bigger_image(self, image):
+        image = image.replace('/pics_webp/boxart_ss/','/database/pics_webp/game/').replace('ss.gif.webp','.jpg.webp').split('?')[0]
+        image = image.replace('/pics_webp/boxart_m/','/database/pics_webp/game/').replace('m.jpg.webp','.jpg.webp')
+        return image
+    
     def parse_pdp(self, response):
         item = response.meta['item']
         item['url'] = response.url
         images = response.xpath('//img[contains(@src,"https://www.suruga-ya.jp/pics_webp/boxart_ss")]//@src').getall()
-        images = [image.replace('boxart_ss','boxart_a').replace('ss.gif.webp','.jpg.webp').split('?')[0] for image in images]
-        images += [response.xpath('//img[contains(@src,"ya.jp/pics_webp/boxart_m")]//@src').get().replace('boxart_m','boxart_a').replace('m.jpg.webp','.jpg.webp').split('?')[0]]
+        images = [self.get_bigger_image(image) for image in images]
+        images += [self.get_bigger_image(response.xpath('//img[contains(@src,"ya.jp/pics_webp/boxart_m")]//@src').get())]
         item['images'] = "|".join(images)
         yield item
