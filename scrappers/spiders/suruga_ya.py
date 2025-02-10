@@ -9,7 +9,6 @@ class Product(scrapy.Item):
     price = scrapy.Field()
     original_price = scrapy.Field()
     images = scrapy.Field()
-    page = scrapy.Field()
 
 class SurugaYaSpider(scrapy.Spider):
     name = "suruga-ya"
@@ -21,7 +20,6 @@ class SurugaYaSpider(scrapy.Spider):
         for product in products:
             item = Product()
             item['title'] = remove_tags(product.css('.product-name').get(''))
-            item['page'] = response.url
             item['quantity'] = remove_tags(product.css('.text-blue-light::text').get('')).replace('(', '').replace('点の中古品)','')
             item['price'] = remove_tags(product.css('.item_price .highlight-box .text-red').get('')).replace('\n','').strip().replace('￥','')
             item['original_price'] = product.xpath(".//p[contains(text(),'定価')]//text()").get('').replace('定価：', '').replace('￥','')
