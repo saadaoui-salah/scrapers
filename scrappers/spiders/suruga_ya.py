@@ -38,7 +38,8 @@ class SurugaYaSpider(scrapy.Spider):
     def parse_pdp(self, response):
         item = response.meta['item']
         item['url'] = response.url
-        images = response.xpath('//img[contains(@src,"ya.jp/pics_webp/boxart_m")]//@src').getall()
-        images = [image.replace('boxart_m','boxart_a').replace('m.jpg.webp','.jpg.webp').split('?')[0] for image in images]
+        images = response.xpath('//img[contains(@src,"https://www.suruga-ya.jp/pics_webp/boxart_ss")]//@src').getall()
+        images = [image.replace('boxart_ss','boxart_a').replace('ss.gif.webp','.jpg.webp').split('?')[0] for image in images]
+        images += [response.xpath('//img[contains(@src,"ya.jp/pics_webp/boxart_m")]//@src').get().replace('boxart_m','boxart_a').replace('m.jpg.webp','.jpg.webp').split('?')[0]]
         item['images'] = "|".join(images)
         yield item
