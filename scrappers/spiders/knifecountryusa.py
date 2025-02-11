@@ -70,7 +70,7 @@ class KnifecountryusaSpider(scrapy.Spider):
                 meta=response.meta
             )
         
-        if next_link := response.css('.Next > a::attr(href)'):
+        if next_link := response.css('.Next > a::attr(href)').get():
             yield scrapy.Request(
                 url=f"https://www.knifecountryusa.com{next_link}",
                 callback=self.parse_products,
