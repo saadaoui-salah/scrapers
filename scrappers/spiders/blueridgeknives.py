@@ -58,7 +58,7 @@ class BlueridgeknivesSpider(scrapy.Spider):
         "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
     }
     cookies = {
-        "form_key": "nNQEQSjXEXx6JB0u",
+        "persistent_shopping_cart": "ycEW8FIpvboteKmS4fSxumUDvKCaODWXRhIcNZ0Arkxh8oZyUK",
         "mage-cache-storage": "{}",
         "mage-cache-storage-section-invalidation": "{}",
         "recently_viewed_product": "{}",
@@ -66,14 +66,15 @@ class BlueridgeknivesSpider(scrapy.Spider):
         "recently_compared_product": "{}",
         "recently_compared_product_previous": "{}",
         "product_data_storage": "{}",
-        "persistent_shopping_cart": "ycEW8FIpvboteKmS4fSxumUDvKCaODWXRhIcNZ0Arkxh8oZyUK",
-        "PHPSESSID": "6421ce12d669dae1e66ac11fc208001c",
-        "private_content_version": "290521747738ad278ab4be30e42b22b3",
-        "X-Magento-Vary": "9b39552580316e1912d12b04cf050a794f7b10f23fb6ca31d2537804684eeb52",
-        "mage-cache-sessid": "true",
         "mage-messages": "",
-        "section_data_ids": '{"customer":1739675512,"compare-products":1739675512,"last-ordered-items":1739675512,"cart":1739675512,"directory-data":1739675512,"captcha":1739675512,"instant-purchase":1739675512,"loggedAsCustomer":1739675512,"persistent":1739675512,"review":1739675512,"payments":1739675512,"wishlist":1739675512,"recently_viewed_product":1739675512,"recently_compared_product":1739675512,"product_data_storage":1739675512,"paypal-billing-agreement":1739675512}'
+        "PHPSESSID": "1f96b432fe376ae1f4de6c683fa4b0d9",
+        "private_content_version": "8b1fd734634a3399b6d0b319e3531f47",
+        "X-Magento-Vary": "9b39552580316e1912d12b04cf050a794f7b10f23fb6ca31d2537804684eeb52",
+        "form_key": "nNQEQSjXEXx6JB0u",
+        "mage-cache-sessid": "true",
+        "section_data_ids": '{"customer":1739738539,"compare-products":1739738539,"last-ordered-items":1739738539,"cart":1739738539,"directory-data":1739738539,"captcha":1739738539,"instant-purchase":1739738539,"loggedAsCustomer":1739738539,"persistent":1739738539,"review":1739738539,"payments":1739738539,"wishlist":1739738539,"recently_viewed_product":1739738539,"recently_compared_product":1739738539,"product_data_storage":1739738539,"paypal-billing-agreement":1739738539}'
     }
+
 
     def start_requests(self):
         yield scrapy.Request(
@@ -114,12 +115,13 @@ class BlueridgeknivesSpider(scrapy.Spider):
                 )
 
     def parse_products(self, response):
-        products = response.css('.product-item-photo::attr(href)').getall()
+        products = response.css('.product-item-link::attr(href)').getall()
         for product in products:
             yield scrapy.Request(
                 url=product,
                 headers=self.headers,
                 cookies=self.cookies,
+                dont_filter=True,
                 callback=self.parse_pdp,
                 meta=response.meta
             )
