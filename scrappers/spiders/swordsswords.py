@@ -117,6 +117,7 @@ class SwordsswordsSpider(scrapy.Spider):
                 url=product,
                 callback=self.parse_pdp,
                 cookies=self.cookies,
+                dont_filter=True,
                 meta={'path': ' > '.join(response.css('.breadcrumb a span::text').getall())}
             )
         
