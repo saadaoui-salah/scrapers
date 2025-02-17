@@ -41,7 +41,7 @@ class Product(scrapy.Item):
 
 class BlueridgeknivesSpider(scrapy.Spider):
     name = "blueridgeknives"
-    start_urls = ["https://store.blueridgeknives.com/shop-by-category"]
+    start_urls = ["https://store.blueridgeknives.com/hydration-and-libation/bottle-and-wine-openers.html"]
     headers = {
         "dnt": "1",
         "pragma": "no-cache",
@@ -61,19 +61,20 @@ class BlueridgeknivesSpider(scrapy.Spider):
         "persistent_shopping_cart": "ycEW8FIpvboteKmS4fSxumUDvKCaODWXRhIcNZ0Arkxh8oZyUK",
         "mage-cache-storage": "{}",
         "mage-cache-storage-section-invalidation": "{}",
+        "mage-messages": "",
         "recently_viewed_product": "{}",
         "recently_viewed_product_previous": "{}",
         "recently_compared_product": "{}",
         "recently_compared_product_previous": "{}",
         "product_data_storage": "{}",
-        "mage-messages": "",
-        "PHPSESSID": "1f96b432fe376ae1f4de6c683fa4b0d9",
-        "private_content_version": "8b1fd734634a3399b6d0b319e3531f47",
+        "PHPSESSID": "964768387e8d71c67e801e1741c6c201",
+        "private_content_version": "f12e97d680c015705df41fe1475f1ba6",
         "X-Magento-Vary": "9b39552580316e1912d12b04cf050a794f7b10f23fb6ca31d2537804684eeb52",
-        "form_key": "nNQEQSjXEXx6JB0u",
+        "form_key": "7bs1RqnvlvkOg2Rn",
         "mage-cache-sessid": "true",
-        "section_data_ids": '{"customer":1739738539,"compare-products":1739738539,"last-ordered-items":1739738539,"cart":1739738539,"directory-data":1739738539,"captcha":1739738539,"instant-purchase":1739738539,"loggedAsCustomer":1739738539,"persistent":1739738539,"review":1739738539,"payments":1739738539,"wishlist":1739738539,"recently_viewed_product":1739738539,"recently_compared_product":1739738539,"product_data_storage":1739738539,"paypal-billing-agreement":1739738539}'
+        "section_data_ids": '{"customer":1739781559,"compare-products":1739781559,"last-ordered-items":1739781559,"cart":1739781559,"directory-data":1739781559,"captcha":1739781559,"instant-purchase":1739781559,"loggedAsCustomer":1739781559,"persistent":1739781559,"review":1739781559,"payments":1739781559,"wishlist":1739781559,"recently_viewed_product":1739781559,"recently_compared_product":1739781559,"product_data_storage":1739781559,"paypal-billing-agreement":1739781559,"messages":1739781559}'
     }
+
 
 
     def start_requests(self):
@@ -87,32 +88,23 @@ class BlueridgeknivesSpider(scrapy.Spider):
 
 
     def parse_categories(self, response):
-        categories = response.css('.mgz-image-link a::attr(href)').getall()
-        for category in categories:
-            yield scrapy.Request(
-                url=f"https://store.blueridgeknives.com/{category}",
-                callback=self.parse_sub_categories,
-                headers=self.headers,
-                cookies=self.cookies,
-            )
-
-    def parse_sub_categories(self, response):
-        categories = response.css('.mgz-element-categories-list li')
-        parent_path = response.css('.title::text').get()
-        if not parent_path:
-            parent_path = response.url.split('/')[-1].replace('.html', '').replace('-', ' ')
-            response.meta = {'path': [parent_path]}
-            yield from self.parse_products(response)
-        else:
+        cats = response.css('[data-amshopby-filter="category_ids"] .am-filter-items-category_ids > li')
+        
+        def parse_categories_tree(categories, path=[]):
             for category in categories:
-                path = [parent_path, category.css('a > span::text').get()]
-                yield scrapy.Request(
-                    url=f"{category.css('a::attr(href)').get()}?product_list_limit=96",
-                    callback=self.parse_products,
-                    headers=self.headers,
-                    cookies=self.cookies,
-                    meta={'path':path}
-                )
+                new_path = path.copy() + [category.css('a .label::text').get()]
+                if category.css('ul'):
+                    yield from parse_categories_tree(category.css('ul > li'), new_path)
+                else:
+                    yield scrapy.Request(
+                        url=category.css('a::attr(href)').get(),
+                        callback=self.parse_products,
+                        headers=self.headers,
+                        cookies=self.cookies,
+                        meta={'path': new_path}
+                    )
+        
+        yield from parse_categories_tree(cats)
 
     def parse_products(self, response):
         products = response.css('.product-item-link::attr(href)').getall()
