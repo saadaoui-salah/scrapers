@@ -46,10 +46,12 @@ class ArabHealthSpider(scrapy.Spider):
             },
         )
 
-    def start_crawling(self, response):
+    def start_crawling(self, response, end_cursor=None):
         keywords = ['Quality','Operation','Regulatory']
         for keyword in keywords:
             data = [{"operationName":"EventPeopleListViewConnectionQuery","variables":{"viewId":"RXZlbnRWaWV3Xzk2MDU5OQ==","search":keyword},"extensions":{"persistedQuery":{"version":1,"sha256Hash":"7f6aeac87634ef772c93d5b0b2e89c9e7ed810a19868180507be401b9ab18214"}}}]
+            if end_cursor:
+                data[0]['variables']["endCursor"] = end_cursor
             yield scrapy.Request(
                 url=self.url,
                 method="POST",
@@ -63,7 +65,8 @@ class ArabHealthSpider(scrapy.Spider):
     
     
     def send_request(self, response):
-        print(response.text)
+        if data['pageInfo']['hasNextPage']:
+            yield from self.start_crawling('', data['pageInfo']['endCursor'])
         data = json.loads(response.css('pre::text').get())[0]
         poeples = data['data']['view']['people']['nodes']
         for person in poeples:
