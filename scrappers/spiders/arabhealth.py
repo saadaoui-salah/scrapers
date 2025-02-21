@@ -46,7 +46,7 @@ class ArabHealthSpider(scrapy.Spider):
             },
         )
 
-    def start_crawling(self):
+    def start_crawling(self, response):
         keywords = ['Quality','Operation','Regulatory']
         for keyword in keywords:
             data = [{"operationName":"EventPeopleListViewConnectionQuery","variables":{"viewId":"RXZlbnRWaWV3Xzk2MDU5OQ==","search":keyword},"extensions":{"persistedQuery":{"version":1,"sha256Hash":"7f6aeac87634ef772c93d5b0b2e89c9e7ed810a19868180507be401b9ab18214"}}}]
