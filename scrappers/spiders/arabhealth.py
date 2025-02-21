@@ -36,8 +36,17 @@ class ArabHealthSpider(scrapy.Spider):
         "x-client-version": "2.309.108",
         "x-feature-flags": "fixBackwardPaginationOrder"
     }
-    
     def start_requests(self):
+        yield scrapy.Request(
+            url='https://connections.arabhealthonline.com/',
+            headers=self.headers,
+            callback=self.start_crawling,
+            meta={
+                "playwright": True,
+            },
+        )
+
+    def start_crawling(self):
         keywords = ['Quality','Operation','Regulatory']
         for keyword in keywords:
             data = [{"operationName":"EventPeopleListViewConnectionQuery","variables":{"viewId":"RXZlbnRWaWV3Xzk2MDU5OQ==","search":keyword},"extensions":{"persistedQuery":{"version":1,"sha256Hash":"7f6aeac87634ef772c93d5b0b2e89c9e7ed810a19868180507be401b9ab18214"}}}]
