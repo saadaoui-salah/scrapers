@@ -54,6 +54,7 @@ class ArabHealthSpider(scrapy.Spider):
     
     
     def send_request(self, response):
+        print(response.text)
         data = json.loads(response.css('pre::text').get())[0]
         poeples = data['data']['view']['people']['nodes']
         for person in poeples:
