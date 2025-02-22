@@ -17,11 +17,22 @@ DOWNLOADER_MIDDLEWARES = {
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = "scrappers (+http://www.yourdomain.com)"
 
+DOWNLOAD_HANDLERS = {
+    "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+    "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+}
+
+
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
 
+
+# Playwright settings
+PLAYWRIGHT_BROWSER_TYPE = "chromium"  # or "firefox" / "webkit"
+PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT = 30000  # 30 seconds
+
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 100
+CONCURRENT_REQUESTS = 20
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
