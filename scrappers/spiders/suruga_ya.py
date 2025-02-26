@@ -13,7 +13,7 @@ class Product(scrapy.Item):
 class SurugaYaSpider(scrapy.Spider):
     name = "suruga-ya"
     allowed_domains = ["suruga-ya.jp"]
-    start_urls = ["https://www.suruga-ya.jp/search?category=5010401&search_word=&grade=%E3%83%8E%E3%83%BC%E3%83%9E%E3%83%AB&is_marketplace=1"]
+    start_urls = ["https://www.suruga-ya.jp/search?category=5010401&search_word=&grade=MG&is_marketplace=1"]
 
     def parse(self, response):
         products = response.css('.item')
