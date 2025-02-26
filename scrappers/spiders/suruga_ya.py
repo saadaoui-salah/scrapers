@@ -13,7 +13,7 @@ class Product(scrapy.Item):
 class SurugaYaSpider(scrapy.Spider):
     name = "suruga-ya"
     allowed_domains = ["suruga-ya.jp"]
-    start_urls = ["https://www.suruga-ya.jp/search?category=5010401&search_word=&grade=MG&is_marketplace=1"]
+    start_urls = ["https://www.suruga-ya.jp/search?category=50104&search_word=30MINUTES%20SISTERS&is_marketplace=1"]
 
     def parse(self, response):
         products = response.css('.item')
@@ -27,7 +27,7 @@ class SurugaYaSpider(scrapy.Spider):
             slug = product.css(".title > a::attr(href)").get('')
             url= slug if slug.startswith('http') else f'https://www.suruga-ya.jp{slug}',
             yield scrapy.Request(
-                url=f'https://www.suruga-ya.jp{product.css(".title > a::attr(href)").get()}',
+                url=url,
                 callback=self.parse_pdp,
                 meta={'item': item}
             )
