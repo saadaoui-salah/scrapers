@@ -25,7 +25,7 @@ class SurugaYaSpider(scrapy.Spider):
             item['price'] = remove_tags(product.css('.item_price .highlight-box .text-red').get('')).replace('\n','').strip().replace('￥','')
             item['original_price'] = product.xpath(".//p[contains(text(),'定価')]//text()").get('').replace('定価：', '').replace('￥','')
             slug = product.css(".title > a::attr(href)").get('')
-            url= slug if slug.startswith('http') else f'https://www.suruga-ya.jp{slug}',
+            url= slug if slug.startswith('http') else f'https://www.suruga-ya.jp{slug}'
             yield scrapy.Request(
                 url=url,
                 callback=self.parse_pdp,
