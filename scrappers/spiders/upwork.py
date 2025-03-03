@@ -17,6 +17,7 @@ class Profile(scrapy.Item):
     english_proficiency = scrapy.Field()
     certifications = scrapy.Field()
     keywords = scrapy.Field()
+    profile_link = scrapy.Field()
 
 class UpworkSpider(scrapy.Spider):
     name = "upwork"
@@ -31,10 +32,10 @@ class UpworkSpider(scrapy.Spider):
         "X-Upwork-Accept-Language": "en-US",
         "Vnd-Eo-Visitorid": "154.249.190.27.1740674940570000",
         "Content-Type": "application/json",
-        "Vnd-Eo-Trace-Id": "9189aa698a80ba95-ALG",
-        "Vnd-Eo-Span-Id": "b4b71fc6-3286-4b94-970c-0fa3e08c4ffe",
-        "Vnd-Eo-Parent-Span-Id": "62c9836c-298a-4600-a97c-14d60bbbd2f7",
-        "Authorization": "Bearer oauth2v2_4e18e917f314fda9106947a555b6be2c",
+        "Vnd-Eo-Trace-Id": "91a6150609692826-ALG",
+        "Vnd-Eo-Span-Id": "9797e157-9928-4c06-83f8-a91c2b7976ef",
+        "Vnd-Eo-Parent-Span-Id": "020138c7-3533-42ee-b2a7-5b30251c5537",
+        "Authorization": "Bearer oauth2v2_a2d750250e02643acfade6351931761b",
         "Sec-Fetch-Dest": "empty",
         "Sec-Fetch-Mode": "cors",
         "Sec-Fetch-Site": "same-origin",
@@ -196,7 +197,7 @@ class UpworkSpider(scrapy.Spider):
         return json.dumps(data)
 
     def start_requests(self):
-        for i in range(11):
+        for i in range(202):
             yield scrapy.Request(
                 url=self.start_urls[0],
                 method="POST",
@@ -207,30 +208,13 @@ class UpworkSpider(scrapy.Spider):
 
     def parse(self, response):
         data = response.json()['data']['search']['universalSearchNuxt']['visitorFreelancerSearchV2']
-        headers = {
-            "Host": "www.upwork.com",
-            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0",
-            "Accept": "application/json, text/plain, */*",
-            "Accept-Language": "en-US,en;q=0.5",
-            "Accept-Encoding": "gzip, deflate, br",
-            "Referer": "https://www.upwork.com/nx/search/talent/details/~01b208d331946ec1d2/profile?loc=pakistan&pt=independent&page=3&pageTitle=Profile&_modalInfo=%5B%7B%22navType%22%3A%22slider%22,%22title%22%3A%22Profile%22,%22modalId%22%3A%221740676234846%22%7D%5D",
-            "X-Odesk-User-Agent": "oDesk LM",
-            "X-Requested-With": "XMLHttpRequest",
-            "X-Upwork-Accept-Language": "en-US",
-            "Vnd-Eo-Trace-Id": "9189aa698a80ba95-ALG",
-            "Vnd-Eo-Span-Id": "5ee4b171-ff2c-442c-bf6b-d818a06e8151",
-            "Vnd-Eo-Parent-Span-Id": "62c9836c-298a-4600-a97c-14d60bbbd2f7",
-            "Sec-Fetch-Dest": "empty",
-            "Sec-Fetch-Mode": "cors",
-            "Sec-Fetch-Site": "same-origin",
-            "Te": "trailers"
-        }
         for profile in data['profiles']:
             url = "https://www.upwork.com/freelancers/public/api/v1/freelancer/profile/{}/details?excludeAssignments=true"
-            item = Porfile()
-            item['verified'] =  True if profile['verifications']['idBadgeStatus'] == 'PASSED' else False
-            item['earning'] = profile['profileAggregates']['totalEarnings']
-            item['success_score'] = profile['profileAggregates']['nSS100BwScore']
+            item = Profile()
+            item['verified'] =  True if profile['profile']['verifications']['idBadgeStatus'] == 'PASSED' else False
+            item['earning'] = profile['profile']['profileAggregates']['totalEarnings']
+            item['success_score'] = profile['profile']['profileAggregates']['nSS100BwScore']
+            item['profile_link'] = profile['profile']['personalData']['profileUrl']
             yield scrapy.Request(
                 url=url.format(profile['profile']['identity']['ciphertext']),
                 headers=self.headers,
@@ -240,16 +224,23 @@ class UpworkSpider(scrapy.Spider):
 
     def parse_profile(self, response):
         data = response.json()['profile']
-        lang = next(filter(lambda x: x['language']['iso639Code'] == 'en', data['languages']), {'proficiencyLevel':{'proficiencyTitle':None}})
+        item = response.meta['item']
+        stats = data['stats']
+        lang = None
+        if data['languages']:
+            lang = next(filter(lambda x: x['language']['iso639Code'] == 'en', data['languages']), {'proficiencyLevel':{'proficiencyTitle':None}})
+            lang = lang['proficiencyLevel']['proficiencyTitle']
         profile = data['profile']
         item['name'] = profile['name']
         item['country'] = profile['location']['country']
         item['city'] = profile['location']['city']
-        item['hourly_rate'] = f"{profile['hourlyRate']['amount']} {profile['hourlyRate']['currencyCode']}"
+        item['hourly_rate'] = f"{stats['hourlyRate']['amount']} {stats['hourlyRate']['currencyCode']}"
         item['title'] = profile['title']
         item['skills'] = [skill['prettyName'] for skill in profile['skills']]
-        item['education'] = [edu['institutionName'] for edu in data['education']]
-        item['reviews'] = profile['stats']['rating']
-        item['english_proficiency'] = lang['proficiencyLevel']['proficiencyTitle']
-        item['certifications'] = [cert['certificate']['name'] for cert in profile['certificates']]
+        if data['education']:
+            item['education'] = [edu['institutionName'] for edu in data['education']]
+        item['reviews'] = data['stats']['rating']
+        item['english_proficiency'] = lang
+        if data['certificates']:
+            item['certifications'] = [cert['certificate']['name'] for cert in data['certificates']]
         yield item
