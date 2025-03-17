@@ -2,7 +2,7 @@ import scrapy
 
 
 class PappersSpider(scrapy.Spider):
-    name = "casino"
+    name = "casino_city"
     custom_headers = {
         "accept": "*/*",
         "accept-language": "fr-FR,fr;q=0.9,ar-DZ;q=0.8,ar;q=0.7,en-US;q=0.6,en;q=0.5",
@@ -23,42 +23,29 @@ class PappersSpider(scrapy.Spider):
     }
 
     def start_requests(self):
-        for region in [4,5,9,7, 15,3, 13,2,8,6,14]:
-            yield scrapy.Request(
-                url=f'https://www.worldcasinodirectory.com/api?region={region}&offset=0&limit=12&order[slots]=DESC', 
-                headers=self.custom_headers,
-                callback=self.parse_contries,
-                meta={'region': region}
-            )
+        yield scrapy.Request(
+            url='https://www.gamingdirectory.com/Registered/Location/ShowProperties.cfm?Search=True', 
+            headers=self.custom_headers,
+            callback=self.parse_contries,
+        )
         
     def parse_contries(self, response):
-        data = response.json()
-        for item in data['items']:
-            url = f'https://www.worldcasinodirectory.com/casino/{item["slug"]}'
+        links = response.css('td.searchFormText > a::attr(href)').getall()
+        for link in links:
+            url = f'https://www.gamingdirectory.com/Registered/Location/{link}'
             yield scrapy.Request(
                 url=url,
                 callback=self.parse_details,
             )
         
-        if int(data['count']['offset']) < int(data['count']['total']):
-            region = response.meta['region']
-            offset = int(data['count']['offset']) + 12
-            yield scrapy.Request(
-                url=f'https://www.worldcasinodirectory.com/api?region={region}&offset={offset}&limit=12&order[slots]=DESC', 
-                headers=self.custom_headers,
-                callback=self.parse_contries,
-                meta=response.meta
-            )
-
 
 
     def parse_details(self,response):
-        mail = response.xpath("//p/strong[contains(text(), 'Email')]/../a/@href").get('').replace('mailto:', '')
-        website = response.xpath("//p/strong[contains(text(), 'Website')]/../a/@href").get('')
-        name = response.css('.cDescription.mobile-padding  h2.bonusesTitle::text').get()
+        mail = response.xpath("//a[contains(@href, 'mailto:')]/@href").get('').replace('mailto:', '')
+        website = response.xpath('a[target="website"]::attr(href)').get('')
+        name = response.css('#headers::text').get()
         if mail and website and name:
             yield {
                 'email': mail,
-                'name': name,
                 'website': website
             }
