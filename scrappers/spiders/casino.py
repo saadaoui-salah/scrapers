@@ -59,6 +59,6 @@ class PappersSpider(scrapy.Spider):
         if mail and website and name:
             yield {
                 'email': mail,
-                'name': name,
+                'name': name.replace('\r','').replace('\n','').strip(),
                 'website': website
             }
