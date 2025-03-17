@@ -13,7 +13,7 @@ class Product(scrapy.Item):
 class SurugaYaSpider(scrapy.Spider):
     name = "suruga-ya"
     allowed_domains = ["suruga-ya.jp"]
-    start_urls = ["https://www.suruga-ya.jp/search?category=50104&search_word=30MINUTES%20SISTERS&is_marketplace=1"]
+    start_urls = ["https://www.suruga-ya.jp/search?category=50104&search_word=&brand=%E3%82%A4%E3%83%9E%E3%82%A4&is_marketplace=1"]
 
     def parse(self, response):
         products = response.css('.item')
@@ -38,6 +38,8 @@ class SurugaYaSpider(scrapy.Spider):
                 callback=self.parse,
             )
     def get_bigger_image(self, image):
+        if not image:
+            return ''
         image = image.replace('/pics_webp/boxart_ss/','/database/pics_webp/game/').replace('ss.gif.webp','.jpg.webp').split('?')[0]
         image = image.replace('/pics_webp/boxart_m/','/database/pics_webp/game/').replace('m.jpg.webp','.jpg.webp')
         return image

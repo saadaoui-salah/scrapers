@@ -1,5 +1,8 @@
 import scrapy
 import json
+import uuid
+import pandas as pd
+
 
 
 class Profile(scrapy.Item):
@@ -30,12 +33,12 @@ class UpworkSpider(scrapy.Spider):
         "Accept-Encoding": "gzip, deflate, br",
         "Referer": "https://www.upwork.com/nx/search/talent/?loc=pakistan&pt=independent&page=3",
         "X-Upwork-Accept-Language": "en-US",
-        "Vnd-Eo-Visitorid": "154.249.190.27.1740674940570000",
+        "Vnd-Eo-Parent-Span-Id": '50fb282d-261a-4a6c-8ba0-10198242e056',
+        "Vnd-Eo-Span-Id": 'efa3d86b-1bad-4db6-9e4f-b9886863bf2f',
+        "Vnd-Eo-Visitorid": "154.249.186.88.1737668725765000",
         "Content-Type": "application/json",
-        "Vnd-Eo-Trace-Id": "91a6150609692826-ALG",
-        "Vnd-Eo-Span-Id": "9797e157-9928-4c06-83f8-a91c2b7976ef",
-        "Vnd-Eo-Parent-Span-Id": "020138c7-3533-42ee-b2a7-5b30251c5537",
-        "Authorization": "Bearer oauth2v2_a2d750250e02643acfade6351931761b",
+        "Vnd-Eo-Trace-Id": "91b0153f4f36ba98-ALG",
+        "Authorization": "Bearer oauth2v2_9e0cbf58a1fe11db46a66ca054c4a292",
         "Sec-Fetch-Dest": "empty",
         "Sec-Fetch-Mode": "cors",
         "Sec-Fetch-Site": "same-origin",
@@ -197,7 +200,13 @@ class UpworkSpider(scrapy.Spider):
         return json.dumps(data)
 
     def start_requests(self):
-        for i in range(202):
+        self.profile_links = []
+        self.profile_links += pd.read_csv("upwork-1.csv")["profile_link"].tolist() 
+        self.profile_links += pd.read_csv("upwork-2.csv")["profile_link"].tolist() 
+        self.profile_links += pd.read_csv("upwork-3.csv")["profile_link"].tolist() 
+        self.profile_links += pd.read_csv("upwork-4.csv")["profile_link"].tolist() 
+        for i in range(205).__reversed__():
+            print(i)
             yield scrapy.Request(
                 url=self.start_urls[0],
                 method="POST",
@@ -215,6 +224,8 @@ class UpworkSpider(scrapy.Spider):
             item['earning'] = profile['profile']['profileAggregates']['totalEarnings']
             item['success_score'] = profile['profile']['profileAggregates']['nSS100BwScore']
             item['profile_link'] = profile['profile']['personalData']['profileUrl']
+            if item['profile_link'] in self.profile_links:
+                continue
             yield scrapy.Request(
                 url=url.format(profile['profile']['identity']['ciphertext']),
                 headers=self.headers,
