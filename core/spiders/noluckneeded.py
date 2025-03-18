@@ -29,7 +29,7 @@ class NoluckneededSpider(scrapy.Spider):
             yield scrapy.Request(
                 url=website,
                 callback=self.yield_item,
-                meta={'item':{'name':name, 'emails':emails},  'handle_httpstatus_list': [403, ]}
+                meta={'item':{'name':name, 'emails':emails},  'handle_httpstatus_list': [403]}
             ) 
     
     def yield_item(self, response):
