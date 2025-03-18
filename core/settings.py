@@ -6,6 +6,9 @@
 #     https://docs.scrapy.org/en/latest/topics/settings.html
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BOT_NAME = "core"
 DOWNLOADER_CLIENT_TLS_METHOD = 'TLS'
@@ -13,14 +16,20 @@ SPIDER_MODULES = ["core.spiders"]
 NEWSPIDER_MODULE = "core.spiders"
 DOWNLOADER_MIDDLEWARES = {
     'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 590,
+    'core.proxy.oxylabs.ProxyMiddleware': 591,
 }
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = "core (+http://www.yourdomain.com)"
 
-#DOWNLOAD_HANDLERS = {
-#    "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
-#    "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
-#}
+DOWNLOAD_HANDLERS = {
+    "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+    "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+}
+
+PLAYWRIGHT_LAUNCH_OPTIONS = {
+    "headless": True,  # Run with visible browser
+}
+
 RETRY_HTTP_CODES = [500, 502, 503, 504, 522, 524, 408, 429, 403]
 
 # Obey robots.txt rules
@@ -28,8 +37,8 @@ ROBOTSTXT_OBEY = False
 RETRY_TIMES = 15
 
 # Playwright settings
-PLAYWRIGHT_BROWSER_TYPE = "chromium"  # or "firefox" / "webkit"
-PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT = 30000  # 30 seconds
+PLAYWRIGHT_BROWSER_TYPE = "firefox"  # or "firefox" / "webkit"
+PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT = 300000  # 30 seconds
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 CONCURRENT_REQUESTS = 20
