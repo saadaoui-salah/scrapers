@@ -1,7 +1,7 @@
 import scrapy
-from scrappers.utils import generate_cookies
+from core.utils.utils import generate_cookies
 import json
-from scrappers.items import Service
+from core.items import Service
 from w3lib.html import remove_tags
 from scrapy import Request
 

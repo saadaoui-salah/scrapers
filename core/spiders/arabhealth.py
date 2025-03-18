@@ -22,7 +22,7 @@ class ArabHealthSpider(scrapy.Spider):
     headers = {
         "accept": "*/*",
         "accept-language": "fr-FR,fr;q=0.9,ar-DZ;q=0.8,ar;q=0.7,en-US;q=0.6,en;q=0.5",
-        "authorization": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb3JlQXBpVXNlcklkIjoiVlhObGNsOHlNalEwT0RreU1nPT0iLCJwZXJtaXNzaW9ucyI6WyJhcHBsaWNhdGlvbjpRWEJ3YkdsallYUnBiMjVmTlRJeCIsInNjaGVtYTp1c2VyIl0sInNlc3Npb25JZCI6IjY3YTYwNjU1NTg0ZjFiYTgxMzNhNWI1NyIsInR5cGUiOiJhY2Nlc3MtdG9rZW4iLCJ1c2VySWQiOiI2NzQ5YmIwYTczMWY2OWUwZjc4M2NlZmMiLCJlbWFpbFZlcmlmaWVkIjp0cnVlLCJpYXQiOjE3NDAxMjg5ODYsImV4cCI6MTc0MDIxNTM4NiwiaXNzIjoiYXV0aC1hcGkifQ.pQYxvGjcx-jSbTSEXdnz3tZdSgDK7fl40cKj2G6RjWyzs9QfvjVMBOEattoHOg8bjGy4at5v-rl2NEHpeWrQNzPg2rBJ2MlVpIwFJQNPYoIPN1ySf8uOM93wrQXHiCDGWQZ8pQiIZI8_k1QhpHcOxMQ6e-d3a4j32E6725Skqw6yLXmzOnTSQxooUKOvlVLru5ptYTgCxWJRMXtSPLjjESevcTajdgBupvWngf_2rN2jf1_lBPxfAzHRvmwmy1U098khC_JvXKQ4N-GsdZ45krubIjue00jHxuw7ZtDBStKDvMhv2cnydOKnOAANLKvMlO6lhr49Rb6eFvr8h60PUyF_nIZNHRE56k6BBNWqHKxF_aCDX1_hC7wEw3i2NHuO1f7Qy2NLIxPTRXIDyEGX6hJ3hK9jQ4HpUVLfvkwfe5Tw5Sr1xsQ9Eh-7f7SbUQ4PB-B-G2PinFEXX-G1XzFRW1qyr1XxlmdiZGN3Xmw3ROLZEul-LoI794BPOQvfIHg10tHwqAu1HGRVDtqSzhWIrLCiyspPSPrBu50ZJK8hqph9IfpbkgQwviMJ3OfN_KfRWt3R3WWRLF6f-jy6eI4I-u90eeT4EfbxIqAdLpuHYCVxN5FbagqEvBPB7hG2cZqF_rwV0mLG4xiUmo11ifxcy3F2UJYvbxU5XFRQ3LiMDSo",
+        "authorization": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb3JlQXBpVXNlcklkIjoiVlhObGNsOHlNalEwT0RreU1nPT0iLCJwZXJtaXNzaW9ucyI6WyJhcHBsaWNhdGlvbjpRWEJ3YkdsallYUnBiMjVmTlRJeCIsInNjaGVtYTp1c2VyIl0sInNlc3Npb25JZCI6IjY3YTYwNjU1NTg0ZjFiYTgxMzNhNWI1NyIsInR5cGUiOiJhY2Nlc3MtdG9rZW4iLCJ1c2VySWQiOiI2NzQ5YmIwYTczMWY2OWUwZjc4M2NlZmMiLCJlbWFpbFZlcmlmaWVkIjp0cnVlLCJpYXQiOjE3NDAyNTMxMjAsImV4cCI6MTc0MDMzOTUyMCwiaXNzIjoiYXV0aC1hcGkifQ.UVYPmLbUc5xwdOmWmYrDTOkTuO0MmzGtYjU3p9nomRL2dwWkfkjVcY7_1JB46FXjQslEbWDWIapgz3AiYm78PUiUvteLX252X1uGtO0FeClvfz7n9RJIHCE73l4voNj5pQpfPsuP13Nx0nVWehm0yF61opex7QRoMTiPEZREgDVIZ7Bih3kVH9wsFSBh4aUe3pRVwRqm8lClEg53KOYpYcUSMzPEqcm1R_wMme6h-o6HX3vFpS3Ok3n3D88WBf8pv6ignJ2xm1RB-3u56_Fja3_x0lz1bjsjSQIfTNPJtfigQMeAz58v9rE49IvXfnhppP65pzjUFGzPtvsRGadwsR3TflHo2hkvD6UG6ITZkKurNjkByHPpsg-Z3W1iysoqy8PFuMLIC1EPFOxPOBsAn8ZJLN_HPApHC4nGtjFUB21l2eaEBiHIQlf32TrZqToLBXHkXVQ1hnUj2HHZg9dO1Qxw8JY8yL0oDU9JgH3Qlym-MGurJxCTyBKRFzRY9zUG6oBYjqNFpEbTIRqKNjcKkmON23PTtSjlTdc-cYz68CYENTHtURCiVMMdZb5vMW1I6dQBPqkwn5Aem5pRaNpIvdNE6e_G1gFgOZ5vzEt2VMWI-fn4vplcSrTMVtex3H7_nET_UUdbRYWnIUcL_9kaYUd38x15fHhQqgQV6-YV8Ys",
         "cache-control": "no-cache",
         "content-type": "application/json",
         "dnt": "1",
@@ -42,12 +42,12 @@ class ArabHealthSpider(scrapy.Spider):
             headers=self.headers,
             callback=self.start_crawling,
             meta={
-                "playwright": True,
+                "proxy": 'http://127.0.0.1:8080',
             },
         )
 
     def start_crawling(self, response, end_cursor=None):
-        keywords = ['Quality','Operation','Regulatory']
+        keywords = ['Regulatory']
         for keyword in keywords:
             data = [{"operationName":"EventPeopleListViewConnectionQuery","variables":{"viewId":"RXZlbnRWaWV3Xzk2MDU5OQ==","search":keyword},"extensions":{"persistedQuery":{"version":1,"sha256Hash":"7f6aeac87634ef772c93d5b0b2e89c9e7ed810a19868180507be401b9ab18214"}}}]
             if end_cursor:
@@ -59,15 +59,16 @@ class ArabHealthSpider(scrapy.Spider):
                 body=json.dumps(data),
                 callback=self.send_request,
                 meta={
-                    "playwright": True,
+                    "proxy": 'http://127.0.0.1:8080',
                 },
             )   
     
     
     def send_request(self, response):
-        if data['pageInfo']['hasNextPage']:
-            yield from self.start_crawling('', data['pageInfo']['endCursor'])
-        data = json.loads(response.css('pre::text').get())[0]
+        data = response.json()
+        data = list(filter(lambda x: x.get('data'), data))[0]
+        if data['data']['view']['people']['pageInfo']['hasNextPage']:
+            yield from self.start_crawling('', data['data']['view']['people']['pageInfo']['endCursor'])
         poeples = data['data']['view']['people']['nodes']
         for person in poeples:
             payload = [
@@ -107,11 +108,11 @@ class ArabHealthSpider(scrapy.Spider):
                 headers=self.headers,
                 body=json.dumps(payload),
                 callback=self.parse,
-                meta={'playwright': True}
+                meta={'proxy': 'http://127.0.0.1:8080'}
             )
 
     def parse(self, response):
-        data = json.loads(response.css('pre::text').get())[0]['data']['person']
+        data = response.json()[0]['data']['person']
         linkedin = list(filter(lambda x: 'LINKEDIN' == x['type'] ,data['socialNetworks']))
         item = Lead()
         item['profile_link'] = f"https://connections.arabhealthonline.com/event/arab-health-2025-1/person/{data['id']}"

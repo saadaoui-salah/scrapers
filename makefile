@@ -3,8 +3,8 @@
 
 run:
 	@echo "" > $(spider).log
-	@echo "" > $(spider).csv
-	@scrapy crawl $(spider) --logfile $(spider).log -o $(spider).csv
+	@echo "" > $(spider).json
+	@scrapy crawl $(spider) --logfile $(spider).log -o $(spider).json
 
 gen:
 	@scrapy genspider $(spider) $(spider).$(name)  

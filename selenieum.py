@@ -1,16 +1,30 @@
-from selenium import webdriver
-import time
+import json
+import requests
+from docx import Document
+from docx.shared import Inches
 
-# Set up the WebDriver (make sure to replace with the path to your WebDriver)
-driver = webdriver.Firefox()
+# Load JSON file
+with open("linkedin.json", "r", encoding="utf-8") as file:
+    data = json.load(file)
 
-# Open the website
-driver.get('https://sachane.com/markalar')
+# Create a new Word document
+doc = Document()
 
-# Sleep for 10 seconds
-input()
+# Iterate through JSON data
+for i, post in enumerate(data, start=1):
+    title = f"Post {i}"
+    text = post.get("text", "")
+    image_url = post.get("image", "")
 
-# Close the browser
-driver.quit()
+    # Add title
+    doc.add_heading(title, level=1)
 
+    # Add text
+    doc.add_paragraph(text)
 
+    # Download and insert image
+    
+# Save the document
+doc.save("output.docx")
+
+print("Word document created successfully!")

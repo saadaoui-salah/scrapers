@@ -1,7 +1,7 @@
 import scrapy
 from scrapy import Request
 import json
-from scrappers.items import Product
+from core.items import Product
 import math
 
 

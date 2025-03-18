@@ -15,7 +15,7 @@ def generate_cookies(urls, sleep=10):
     firefox_options = Options()
     firefox_options.add_argument('--headless')
     driver = webdriver.Firefox(options=firefox_options, service=service)
-        
+
     for url in urls:
         driver.get(url)
         time.sleep(sleep)
@@ -112,7 +112,7 @@ def insert_csv_to_db(file_path):
     for index, row in df.iterrows():
         # Get lat-long from the location
         #lat_long = get_lat_long(row['location'])  # Replace 'location' with the correct column name for the address
-        
+
         # Prepare the SQL query
         insert_query = """
         INSERT INTO business_information (
@@ -138,11 +138,8 @@ def insert_csv_to_db(file_path):
     cursor.close()
     connection.close()
 
-
-file_pattern = "./client-data/*.csv"
-
-    # List all files matching the pattern
-file_list = ['./client-data/hot.csv', './client-data/serviceseeking.csv', './client-data/truelocal.csv', './client-data/start.csv', './client-data/gumtree.csv', './client-data/hipages.csv']
-
-#for f in file_list:
-#    insert_csv_to_db(f)
+def find_email(text):
+    import re
+    email_pattern = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"
+    emails = re.match(email_pattern, text)
+    return emails

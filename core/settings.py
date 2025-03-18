@@ -1,4 +1,4 @@
-# Scrapy settings for scrappers project
+# Scrapy settings for core project
 #
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
@@ -7,25 +7,25 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = "scrappers"
+BOT_NAME = "core"
 DOWNLOADER_CLIENT_TLS_METHOD = 'TLS'
-SPIDER_MODULES = ["scrappers.spiders"]
-NEWSPIDER_MODULE = "scrappers.spiders"
+SPIDER_MODULES = ["core.spiders"]
+NEWSPIDER_MODULE = "core.spiders"
 DOWNLOADER_MIDDLEWARES = {
     'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 590,
 }
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = "scrappers (+http://www.yourdomain.com)"
+#USER_AGENT = "core (+http://www.yourdomain.com)"
 
-DOWNLOAD_HANDLERS = {
-    "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
-    "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
-}
-
+#DOWNLOAD_HANDLERS = {
+#    "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+#    "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+#}
+RETRY_HTTP_CODES = [500, 502, 503, 504, 522, 524, 408, 429, 403]
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
-
+RETRY_TIMES = 15
 
 # Playwright settings
 PLAYWRIGHT_BROWSER_TYPE = "chromium"  # or "firefox" / "webkit"
@@ -57,13 +57,13 @@ DOWNLOAD_DELAY = 1
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 #SPIDER_MIDDLEWARES = {
-#    "scrappers.middlewares.ScrappersSpiderMiddleware": 543,
+#    "core.middlewares.coreSpiderMiddleware": 543,
 #}
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #DOWNLOADER_MIDDLEWARES = {
-#    "scrappers.middlewares.ScrappersDownloaderMiddleware": 543,
+#    "core.middlewares.coreDownloaderMiddleware": 543,
 #}
 
 # Enable or disable extensions
@@ -75,7 +75,7 @@ DOWNLOAD_DELAY = 1
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 #ITEM_PIPELINES = {
-#    "scrappers.pipelines.ScrappersPipeline": 300,
+#    "core.pipelines.corePipeline": 300,
 #}
 
 # Enable and configure the AutoThrottle extension (disabled by default)

@@ -1,7 +1,7 @@
 import json
 import scrapy
 from scrapy import Request
-from scrappers.items import Service
+from core.items import Service
 
 
 class StartlocalSpider(scrapy.Spider):

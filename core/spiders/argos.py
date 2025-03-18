@@ -1,7 +1,7 @@
 import scrapy
 import json
 from scrapy import Request
-from scrappers.items import Product
+from core.items import Product
 import math
 
 class ArgosSpider(scrapy.Spider):

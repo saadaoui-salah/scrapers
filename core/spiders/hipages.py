@@ -1,6 +1,6 @@
 import scrapy
 from scrapy import Request
-from scrappers.items import Service
+from core.items import Service
 import json
 from html import unescape
 from w3lib.html import remove_tags

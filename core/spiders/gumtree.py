@@ -1,7 +1,7 @@
 import json
 import scrapy
 from  scrapy import Selector
-from scrappers.items import Service
+from core.items import Service
 import os
 from w3lib.html import remove_tags 
 

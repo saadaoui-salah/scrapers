@@ -1,7 +1,7 @@
 import scrapy
 import os
-from scrappers.items import Service
-from scrappers.utils import read_json
+from core.items import Service
+from core.utils.utils import read_json
 
 class TruelocalSpider(scrapy.Spider):
     name = "truelocal"

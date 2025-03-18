@@ -24,7 +24,7 @@ class SofiaSpaSpider(scrapy.Spider):
         "sec-ch-ua-platform": "Linux",
     }
 
-    def parse(self, response):
+    def parse_tree(self, response):
         """Extract categories and start parsing them."""
         categories = response.css('#menu-main-menu-mobile-1 .qodef-drop-down-second-inner > ul > li')
         def parse_tree(cats, path=[]):
@@ -46,17 +46,18 @@ class SofiaSpaSpider(scrapy.Spider):
 
         yield from parse_tree(categories)
 
-    def parse_category_pages(self, response):
+    def parse(self, response):
         """Extract pagination and loop through product pages."""
-        category_name = response.meta['category']
-        category_slug = response.meta['slug']
-        last_page = len(response.css('a.page-numbers')) - 1
+        try:
+            last_page = int(response.css('a[class="page-numbers"]::text').getall()[-1].replace('.',''))
+        except:
+            last_page = 1
 
         for page in range(1, last_page + 1):
             url = f"https://www.sofiaspa.it/wp-admin/admin-ajax.php"
             data = {
                 "action": "woof_draw_products",
-                "link": f"https://www.sofiaspa.it/catalogo/?swoof=1&reload=true&product_cat={category_slug}&paged={page}",
+                "link": f"https://www.sofiaspa.it/catalogo/?swoof=1&reload=true&paged={page}",
                 "page": str(page),
                 "shortcode": f"woof_products is_ajax=1 page={page}",
                 "woof_shortcode": "woof sections='product_cat+product_cat^Categorie prodotti,pa_colore+pa_colore^Colore,pa_pietra+pa_pietra^Pietra' sections_type='tabs_checkbox'",
@@ -66,14 +67,12 @@ class SofiaSpaSpider(scrapy.Spider):
                 url=url,
                 formdata=data,
                 headers=self.headers,
-                dont_filter=True,
                 callback=self.parse_products,
-                meta={'category': category_name}
+                meta={'page': page}
             )
 
     def parse_products(self, response):
         """Extract product links from AJAX response."""
-        category_name = response.meta['category']
 
         try:
             data = json.loads(response.text)
@@ -85,9 +84,8 @@ class SofiaSpaSpider(scrapy.Spider):
             for product_url in product_links:
                 yield response.follow(
                     product_url,
-                    dont_filter=True,
                     callback=self.parse_product_details,
-                    meta={'category': category_name}
+                    meta=response.meta
                 )
 
         except json.JSONDecodeError:
@@ -95,7 +93,6 @@ class SofiaSpaSpider(scrapy.Spider):
 
     def parse_product_details(self, response):
         """Extract product details."""
-        category_name = response.meta['category']
 
         riferimento = response.css('span.sku.qodef-woo-meta-value::text').get(default="N/A")
         peso = response.css('tr.woocommerce-product-attributes-item--weight td.woocommerce-product-attributes-item__value::text').get(default="N/A")
@@ -103,5 +100,5 @@ class SofiaSpaSpider(scrapy.Spider):
         yield {
             'Riferimento': riferimento.strip(),
             'Peso': peso.strip(),
-            'Category': category_name
+            'page': response.meta['page']
         }
