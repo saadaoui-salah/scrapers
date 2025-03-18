@@ -12,7 +12,6 @@ class CasinolistingsSpider(scrapy.Spider):
         "dnt": "1",
         "pragma": "no-cache",
         "priority": "u=0, i",
-        "referer": "https://www.casinolistings.com/casinos",
         "sec-ch-ua": '"Google Chrome";v="129", "Not=A?Brand";v="8", "Chromium";v="129"',
         "sec-ch-ua-mobile": "?0",
         "sec-ch-ua-platform": '"Linux"',
@@ -24,37 +23,53 @@ class CasinolistingsSpider(scrapy.Spider):
         "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
     }
     cookies = {
-        "_ga": "GA1.1.611698300.1742251557",
-        "VARYclprefs": "USD_DZ_",
-        "cf_clearance": "LOKMKmHHMSCNtpnqCnPwVkg21yOW4VrdUevD1aiO77w-1742314036-1.2.1.1-nCePBn.GHhIbj75K_MYfOBcUH09ikSqg6Q0eH5yIaK5W6ktMiwU9LL.XOK4Ip5Ux8JhNsMxiMqVllTJzVpXAu249s0aKGatEFcI5kU2Ka4xUfGMezqY3y3IU9oQlAVKfaukzuYCxS.oLS6Yi5PH6tBVoN.X7d67Zo8fuxik7hVeFcXdvCfSQQmSviVCnooTnD0b7PQKct3XM4amyMYlALYrRZ5BTCTFmnDQW0gUKsaRfhM9bXfV6V9JK6kUpgYGnEP61fhJ7nvEhoA7M0B1iiUx7uW1.7_c.ugAC6oW7P9q_JXU78t66C7A46StEYje.Ghod9pFcpVGGU4X6DhFyF192glog8lj0TVKMscDk9PM",
-        "_ga_GXDRKL1LX9": "GS1.1.1742312747.3.1.1742314576.60.0.0"
+        "_ga": "GA1.1.2088439758.1742251795",
+        "_omappvp": "8Bpcsn0KXQaTduW4pnRUg4n7oYY9rMNyInIesA8ZeXUl1drnq4pMHeYds7ERLaQV3g3o5qML3TqPsRAU3ocTu6TsNFOAkGuE",
+        "cookiePolicy_accepted": "1",
+        "omSeen-lbpmk6lafq3py27of8k1": "1742251846986",
+        "_fbp": "fb.1.1742309544949.73585409399747916",
+        "_cfuvid": "jjVppAEWouabwHgyzBfS31p2eqeMrWoFDiyH_S6t7zU-1742316791424-0.0.1.1-604800000",
+        "__cf_bm": "QbK.3nHbyOIsm2sS8DQoxUUSFdjQ6HNZIP.w2auha8U-1742327155-1.0.1.1-7OdyQ3sjz0LdcEQ68FPw25DGqYoQ_qDDkpEHkakvcd64lFOimB_HNmxtRh6GA2ZvChZDJBpE6QuC91SZFI6Yt6oD7a3xLrBtFO0eDln.ztA",
+        "omSeen-w7bhqpmgb5t73nqnldfx": "1742327237396",
+        "om-w7bhqpmgb5t73nqnldfx": "1742327255468",
+        "_ga_PWQZ79LZK1": "GS1.1.1742327159.3.1.1742327294.60.0.0"
     }
 
+
     def start_requests(self):
-        yield scrapy.Request(
-            url="https://www.casinolistings.com/casinos",
-            headers=self.headers,
-            cookies=self.cookies,
-            callback=self.parse,
-            meta={'playwright':True}
-        )
+        for i in range(65):
+            yield scrapy.Request(
+                url=f"https://www.askgamblers.com/online-casinos/countries/at/{i+1}",
+                headers=self.headers,
+                cookies=self.cookies,
+                callback=self.parse,
+                meta={'playwright':True, "playwright_request": self.block_images_and_svgs,}
+            )
         
     def parse(self, response):
-        for casino in response.css('td.name a'):
-            name = casino.css('::text').get()
+        for casino in response.css('.ag-card > a'):
+            name = casino.css('::attr(title)').get()
             link = casino.css('::attr(href)').get()
             yield scrapy.Request(
-                url=f"https://www.casinolistings.com{link}",
+                url=link,
                 headers=self.headers,
                 cookies=self.cookies,
                 callback=self.parse_details,
-                meta={'name':name, 'playwright':True}
+                meta={'playwright':True, "playwright_request": self.block_images_and_svgs,}
             )
+
+    async def block_images_and_svgs(self, request):
+        """Blocks images and SVG requests."""
+        if request.resource_type in ["image"]:
+            return request.abort()
+        if request.url.endswith(".svg"):  # Block SVGs specifically
+            return request.abort()
+        return request.continue_()
 
     def parse_details(self, response):
         name = response.meta['name']
-        emails = response.xpath("//li/em[contains(text(), 'Email')]/../text()").getall()
-        website = response.css('.casino-actions a.play::attr(href)').get()
+        emails = response.xpath("//div[contains(text(), 'Email') and @class='review-details__text']/text()").getall()
+        website = response.css('.review-details__text > a.js-ga-website::text').get()
         emails = ' '.join(emails)
         emails = find_emails(emails)
         if all([name,emails,website]):
@@ -65,7 +80,7 @@ class CasinolistingsSpider(scrapy.Spider):
             yield scrapy.Request(
                 url=f"https://www.casinolistings.com{website}",
                 callback=self.yield_item,
-                meta={"item":item, 'handle_httpstatus_list': [403], 'playwright':True}
+                meta={"item":item, 'handle_httpstatus_list': [403]}
             )
 
     def yield_item(self, response):

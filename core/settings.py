@@ -37,7 +37,7 @@ ROBOTSTXT_OBEY = False
 RETRY_TIMES = 15
 
 # Playwright settings
-PLAYWRIGHT_BROWSER_TYPE = "chromium"  # or "firefox" / "webkit"
+PLAYWRIGHT_BROWSER_TYPE = "firefox"  # or "firefox" / "webkit"
 PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT = 300000  # 30 seconds
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
