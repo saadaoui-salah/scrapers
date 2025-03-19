@@ -44,12 +44,10 @@ class CasinolistingsSpider(scrapy.Spider):
                 callback=self.parse,
                 meta={'playwright':True, "playwright_request": self.block_images_and_svgs,}
             )
-            break
         
     def parse(self, response):
         for casino in response.css('.ag-card > a'):
             name = casino.css('::attr(title)').get()
-            print(name)
             link = casino.css('::attr(href)').get()
             link = f'https://www.askgamblers.com{link}' if not 'https://www.askgamblers.com' in link else link
             yield scrapy.Request(
