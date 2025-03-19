@@ -1,4 +1,5 @@
 import scrapy
+from core.utils.security import decode_cf_email
 from core.utils.search import find_emails
 
 
@@ -35,25 +36,25 @@ class CasinolistingsSpider(scrapy.Spider):
         "_ga_PWQZ79LZK1": "GS1.1.1742327159.3.1.1742327294.60.0.0"
     }
 
-
     def start_requests(self):
         for i in range(65):
             yield scrapy.Request(
                 url=f"https://www.askgamblers.com/online-casinos/countries/at/{i+1}",
                 headers=self.headers,
-                cookies=self.cookies,
                 callback=self.parse,
                 meta={'playwright':True, "playwright_request": self.block_images_and_svgs,}
             )
+            break
         
     def parse(self, response):
         for casino in response.css('.ag-card > a'):
             name = casino.css('::attr(title)').get()
+            print(name)
             link = casino.css('::attr(href)').get()
+            link = f'https://www.askgamblers.com{link}' if not 'https://www.askgamblers.com' in link else link
             yield scrapy.Request(
                 url=link,
                 headers=self.headers,
-                cookies=self.cookies,
                 callback=self.parse_details,
                 meta={'playwright':True, 'name':name, "playwright_request": self.block_images_and_svgs}
             )
@@ -64,6 +65,10 @@ class CasinolistingsSpider(scrapy.Spider):
             return request.abort()
         if request.url.endswith(".svg"):  # Block SVGs specifically
             return request.abort()
+        if 'google.com' in request.url:
+            return request.abort()
+        if 'facebook.net' in request.url:
+            return request.abort()
         return request.continue_()
 
     def parse_details(self, response):
@@ -72,13 +77,14 @@ class CasinolistingsSpider(scrapy.Spider):
         website = response.css('.review-details__text > a.js-ga-website::text').get()
         emails = ' '.join(emails)
         emails = find_emails(emails)
+        print(name,emails,website)
         if all([name,emails,website]):
             item = {
                 'name':name,
                 'emails':emails,
             }
             yield scrapy.Request(
-                url=f"https://www.casinolistings.com{website}",
+                url=website,
                 callback=self.yield_item,
                 meta={"item":item, 'handle_httpstatus_list': [403]}
             )
