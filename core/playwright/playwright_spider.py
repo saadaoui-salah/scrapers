@@ -50,7 +50,7 @@ class PlaywrightSpider(Spider):
                 "headless": not getattr(cls, 'visible', False),
                 "args": ["--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage"]
             },
-            "PLAYWRIGHT_BROWSER_TYPE": cls.browsers[getattr(cls, 'browser', "chrome")],  # Uses subclass's `browser`
+            "PLAYWRIGHT_BROWSER_TYPE": cls.browsers[getattr(cls, 'browser', "firefox")],  # Uses subclass's `browser`
             "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": getattr(cls, 'timeout', 300) * 1000,
             "PLAYWRIGHT_MAX_CONTEXTS": getattr(cls, 'context', 4),
             "PLAYWRIGHT_MAX_PAGES_PER_CONTEXT": getattr(cls, 'pages', 5),
