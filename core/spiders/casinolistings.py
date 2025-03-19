@@ -26,7 +26,8 @@ class CasinolistingsSpider(PlaywrightSpider):
         "upgrade-insecure-requests": "1",
         "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
     }
-    pages = 7
+    pages = 3
+    context = 2
 
     def start_requests(self):
         for i in range(65):

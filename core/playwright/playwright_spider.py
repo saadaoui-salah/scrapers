@@ -48,6 +48,7 @@ class PlaywrightSpider(Spider):
             },
             "PLAYWRIGHT_LAUNCH_OPTIONS": {
                 "headless": not getattr(cls, 'visible', False),
+                "args": ["--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage"]
             },
             "PLAYWRIGHT_BROWSER_TYPE": cls.browsers[getattr(cls, 'browser', "chrome")],  # Uses subclass's `browser`
             "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": getattr(cls, 'timeout', 300) * 1000,
@@ -56,5 +57,6 @@ class PlaywrightSpider(Spider):
             "DOWNLOADER_MIDDLEWARES": {
                 'core.playwright.middleware.PlaywrightMiddleware': 592,
             },
+
             "PLAYWRIGHT_ABORT_REQUEST":should_abort_request
         }
