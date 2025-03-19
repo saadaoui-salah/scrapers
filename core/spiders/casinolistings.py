@@ -37,9 +37,30 @@ class CasinolistingsSpider(scrapy.Spider):
     }
 
     def start_requests(self):
-        for i in range(65):
+        for i in range(57):
             yield scrapy.Request(
-                url=f"https://www.askgamblers.com/online-casinos/countries/at/{i+1}",
+                url=f"https://www.askgamblers.com/online-casinos/countries/ao/{i+1}",
+                headers=self.headers,
+                callback=self.parse,
+                meta={'playwright':True, "playwright_request": self.block_images_and_svgs,}
+            )
+        for i in range(70):
+            yield scrapy.Request(
+                url=f"https://www.askgamblers.com/online-casinos/countries/ar/{i+1}",
+                headers=self.headers,
+                callback=self.parse,
+                meta={'playwright':True, "playwright_request": self.block_images_and_svgs,}
+            )
+        for i in range(63):
+            yield scrapy.Request(
+                url=f"https://www.askgamblers.com/online-casinos/countries/az/{i+1}",
+                headers=self.headers,
+                callback=self.parse,
+                meta={'playwright':True, "playwright_request": self.block_images_and_svgs,}
+            )
+        for i in range(67):
+            yield scrapy.Request(
+                url=f"https://www.askgamblers.com/online-casinos/countries/bh/{i+1}",
                 headers=self.headers,
                 callback=self.parse,
                 meta={'playwright':True, "playwright_request": self.block_images_and_svgs,}
