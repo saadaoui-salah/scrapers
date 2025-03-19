@@ -55,7 +55,7 @@ class CasinolistingsSpider(scrapy.Spider):
                 headers=self.headers,
                 cookies=self.cookies,
                 callback=self.parse_details,
-                meta={'playwright':True, "playwright_request": self.block_images_and_svgs,}
+                meta={'playwright':True, 'name':name, "playwright_request": self.block_images_and_svgs}
             )
 
     async def block_images_and_svgs(self, request):
