@@ -10,7 +10,26 @@ import pandas as pd
 import numpy as np
 CURRENT_PATH = os.getenv('PWD')
 
-def generate_cookies(urls, sleep=10):
+
+
+async def generate_cookies(self, urls, sleep=10):
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True)  # Change to True if you want headless mode
+        context = await browser.new_context()
+        page = await context.new_page()
+        await page.wait_for_timeout(sleep*100)  # Wait for the page to load
+        for url in urls:
+            await page.goto(url)
+            await page.wait_for_timeout(sleep*100)  # Wait for the page to load
+
+        cookies = await context.cookies()
+        self.cookies = []
+        print(cookies)
+        await browser.close()
+        return cookies
+
+
+def p(urls, sleep=10):
     service = Service(executable_path=f"{CURRENT_PATH}/geckodriver")
     firefox_options = Options()
     firefox_options.add_argument('--headless')

@@ -1,30 +1,46 @@
+import asyncio
+from playwright.async_api import async_playwright
+import os
 import json
-import requests
-from docx import Document
-from docx.shared import Inches
 
-# Load JSON file
-with open("linkedin.json", "r", encoding="utf-8") as file:
-    data = json.load(file)
+CURRENT_PATH = os.getenv('PWD')
 
-# Create a new Word document
-doc = Document()
+email = 'moonvielle@gmail.com'
+password = 'Eda11121988!'
 
-# Iterate through JSON data
-for i, post in enumerate(data, start=1):
-    title = f"Post {i}"
-    text = post.get("text", "")
-    image_url = post.get("image", "")
+async def generate_cookies():
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=False)  # Change to True if you want headless mode
+        context = await browser.new_context()
+        page = await context.new_page()
+        
+        # Facebook Login
+        await page.goto('https://www.facebook.com/')
+        await page.wait_for_selector("#email")
+        await page.fill('#email', email)
+        await page.fill('#pass', password)
+        await page.click('button[name="login"]')
+        await page.wait_for_timeout(5000)  # Wait for the page to load
+        input('Please Solve the challenge and press enter')
 
-    # Add title
-    doc.add_heading(title, level=1)
+        await page.goto('https://www.webtoons.com/member/login')
+        await page.wait_for_timeout(5000)  # Wait for the page to load
+        await page.click('._btnLoginSns.facebook')
+        await page.wait_for_timeout(5000)  # Wait for the page to load
+        await page.click("[role='button']")
+        await page.wait_for_timeout(5000)  # Wait for the page to load
 
-    # Add text
-    doc.add_paragraph(text)
+        input('Please Solve the challenge and press enter')
 
-    # Download and insert image
-    
-# Save the document
-doc.save("output.docx")
+        # Get cookies after login
+        cookies = await context.cookies()
+        print(cookies)  # List of all cookies
 
-print("Word document created successfully!")
+        # Save cookies to a file
+        with open("cookies.json", "w") as f:
+            json.dump(cookies, f)
+
+        await browser.close()
+        return cookies
+
+#asyncio.run(generate_cookies())

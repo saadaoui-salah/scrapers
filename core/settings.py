@@ -21,24 +21,11 @@ DOWNLOADER_MIDDLEWARES = {
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = "core (+http://www.yourdomain.com)"
 
-DOWNLOAD_HANDLERS = {
-    "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
-    "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
-}
-
-PLAYWRIGHT_LAUNCH_OPTIONS = {
-    "headless": True,  # Run with visible browser
-}
-
 RETRY_HTTP_CODES = [500, 502, 503, 504, 522, 524, 408, 429, 403]
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
 RETRY_TIMES = 15
-
-# Playwright settings
-PLAYWRIGHT_BROWSER_TYPE = "firefox"  # or "firefox" / "webkit"
-PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT = 300000  # 30 seconds
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 CONCURRENT_REQUESTS = 20
