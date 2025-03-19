@@ -64,6 +64,7 @@ class CasinolistingsSpider(PlaywrightSpider):
                 url=link,
                 headers=self.headers,
                 callback=self.parse_details,
+                meta={'name': name}
             )
 
     def parse_details(self, response):
