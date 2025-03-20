@@ -27,30 +27,12 @@ class CasinolistingsSpider(PlaywrightSpider):
         "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
     }
     pages = 3
-    context = 2
+    context = 1
 
     def start_requests(self):
         for i in range(65):
             yield scrapy.Request(
-                url=f"https://www.askgamblers.com/online-casinos/countries/bd/{i+1}",
-                headers=self.headers,
-                callback=self.parse,
-            )
-        for i in range(39):
-            yield scrapy.Request(
-                url=f"https://www.askgamblers.com/online-casinos/countries/be/{i+1}",
-                headers=self.headers,
-                callback=self.parse,
-            )
-        for i in range(44):
-            yield scrapy.Request(
-                url=f"https://www.askgamblers.com/online-casinos/countries/bg/{i+1}",
-                headers=self.headers,
-                callback=self.parse,
-            )
-        for i in range(69):
-            yield scrapy.Request(
-                url=f"https://www.askgamblers.com/online-casinos/countries/ca/{i+1}",
+                url=f"https://www.askgamblers.com/online-casinos/countries/co/{i+1}",
                 headers=self.headers,
                 callback=self.parse,
             )
