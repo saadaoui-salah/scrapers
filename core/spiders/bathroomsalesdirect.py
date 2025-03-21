@@ -1,22 +1,11 @@
 import scrapy
 import json
 
-BLACK = [
-'https://www.bathroomsalesdirect.com.au/my-account/',
-'https://www.bathroomsalesdirect.com.au/delivery-information/',
-'https://www.bathroomsalesdirect.com.au/faqs/',
-'https://www.bathroomsalesdirect.com.au/contact-us/',
-'mailto:info@bathroomsalesdirect.com.au',
-'tel:02 8488 1564'
-]
-
-
 class BathroomsalesdirectSpider(scrapy.Spider):
     name = "bathroomsalesdirect"
     start_urls = ["https://www.bathroomsalesdirect.com.au/wp-json/menus/v1/mega-menu/?menu_id=shop-products"]
 
     api_url = "https://www.bathroomsalesdirect.com.au/wp-admin/admin-ajax.php"
-    proxy = 'burp'
     headers = {
         "Accept": "*/*",
         "accept-encoding": "gzip, deflate, br, zstd",
