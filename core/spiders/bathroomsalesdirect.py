@@ -1,5 +1,6 @@
 import scrapy
 import json
+from requests_toolbelt.multipart.encoder import MultipartEncoder
 
 class BathroomsalesdirectSpider(scrapy.Spider):
     name = "bathroomsalesdirect"
@@ -27,6 +28,7 @@ class BathroomsalesdirectSpider(scrapy.Spider):
         "sec-fetch-site": "same-origin",
         "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
     }
+    proxy = 'burp'
 
     
     def start_requests(self):
@@ -41,33 +43,35 @@ class BathroomsalesdirectSpider(scrapy.Spider):
         data = response.json()['menu']
         sel = scrapy.Selector(text=data)
         links = sel.css('#menu-mega-menu a::attr(href)').getall()
-
         for link in links:
             if 'product-category' not in link:
                 continue
             slugs = link.split('/')
             category = [slugs[-2] if link.endswith('/') else slugs[-1]]
-            payload = f'''------WebKitFormBoundaryDBgPRLF0SxKBJmyJ
-Content-Disposition: form-data; name="action"
+            payload = MultipartEncoder(
+            fields={
+                "action": "shop_filters",
+                "payload": json.dumps({
+                    "page": 1,
+                    "per_page": 12,
+                    "filters": {"product_cat": category},
+                    "orderby": "popularity",
+                    "order": "desc",
+                    "paginate": "more"
+                }),
+                "refresh_attributes": "true"
+                }
+            )
 
-shop_filters
-------WebKitFormBoundaryDBgPRLF0SxKBJmyJ
-Content-Disposition: form-data; name="payload"
-
-{{"page":1,"per_page":12,"filters":{{"product_cat":{category}}},"orderby":"popularity","order":"desc","paginate":"more"}}
-------WebKitFormBoundaryDBgPRLF0SxKBJmyJ
-Content-Disposition: form-data; name="refresh_attributes"
-
-true
-------WebKitFormBoundaryDBgPRLF0SxKBJmyJ--
-            '''
             yield scrapy.Request(
                 self.api_url,
-                method='POST',
-                body=payload,
-                headers=self.headers,
+                method="POST",
+                body=payload.to_string(),  # Convert to raw multipart data
+                headers={
+                    "Content-Type": payload.content_type,  # Set proper content type
+                    "User-Agent": "Mozilla/5.0"
+                },
                 callback=self.parse_products,
-                errback=self.errback,
                 meta={'page':1, 'category': category}
             )
 
@@ -76,45 +80,40 @@ true
         sel = scrapy.Selector(text=response.json()['data']['products'])
         for product in sel.css('.product .border-gray-subtle >  a::attr(href)').getall():
             yield scrapy.Request(url=product, callback=self.parse_pdp)
-        
-        if response.json()['data']['header']['x-wp-totalpages'] > response.meta['page']:
+        if response.json()['data']['header']['x-wp-totalpages'] < response.meta['page']:
             category = response.meta['category']
             page = response.meta['page'] + 1
-            payload = f'''------WebKitFormBoundaryDBgPRLF0SxKBJmyJ
-Content-Disposition: form-data; name="action"
-
-shop_filters
-------WebKitFormBoundaryDBgPRLF0SxKBJmyJ
-Content-Disposition: form-data; name="payload"
-
-{{"page":{page},"per_page":12,"filters":{{"product_cat":{category}}},"orderby":"popularity","order":"desc","paginate":"more"}}
-------WebKitFormBoundaryDBgPRLF0SxKBJmyJ
-Content-Disposition: form-data; name="refresh_attributes"
-
-true
-------WebKitFormBoundaryDBgPRLF0SxKBJmyJ--
-            '''
+            payload = MultipartEncoder(
+            fields={
+                "action": "shop_filters",
+                "payload": json.dumps({
+                    "page": page,
+                    "per_page": 12,
+                    "filters": {"product_cat": category},
+                    "orderby": "popularity",
+                    "order": "desc",
+                    "paginate": "more"
+                }),
+                "refresh_attributes": "true"
+                }
+            )
             yield scrapy.Request(
                 self.api_url,
-                method='POST',
-                body=payload,
-                headers=self.headers,
-                callback=self.parse_products,
-                meta={
-                    'page': page, 
-                    'category': category
+                method="POST",
+                body=payload.to_string(),  # Convert to raw multipart data
+                headers={
+                    "Content-Type": payload.content_type,  # Set proper content type
+                    "User-Agent": "Mozilla/5.0"
                 },
+                callback=self.parse_products,
+                meta={'page':page, 'category': category}
             )
     
-    def errback(self, failure):
-        print(failure.value.response.url)
-    
     def parse_pdp(self, response):
-        data = json.loads(response.css('input[name="gtm4wp_product_data"]::attr(value)').get())
         yield {
-            'sku':data['sku'],
-            'title':data['item_name'],
-            'RRP': response.css('.pewc-main-price .small-dollar bdi::text').get(),
+            'sku':response.xpath("//div[contains(@class, 'sku')]//span[2]/text()").get(),
+            'title':response.css(".fs-xl-2.ff-secondary::text").get(),
+            'RRP': ' - '.join(response.css('.pewc-main-price .small-dollar bdi::text').getall()),
             'price': response.css('.pewc-main-price .text-decoration-line-through bdi::text').get(),
             'brand':response.xpath("//div[@id='product-info']//div[contains(@class,'row')]"\
                 "//div[contains(text(), 'Brand')]/../../following-sibling::*[1]/div/text()").get('').replace('\n','').strip(),

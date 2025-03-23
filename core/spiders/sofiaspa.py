@@ -23,6 +23,7 @@ class SofiaSpaSpider(scrapy.Spider):
         "sec-ch-ua-mobile": "?0",
         "sec-ch-ua-platform": "Linux",
     }
+    proxy = {'proxy': 'https://c3db49801a4e57f2:RNW78Fm5@res.proxy-seller.com:10000'}
 
     def parse_tree(self, response):
         """Extract categories and start parsing them."""
@@ -41,7 +42,7 @@ class SofiaSpaSpider(scrapy.Spider):
                         url=f"https://www.sofiaspa.it/catalogo/?swoof=1&reload=true&paged=1&product_cat={category_slug}",
                         callback=self.parse_category_pages,
                         dont_filter=True,
-                        meta={'category': " > ".join(new_path), 'slug': category_slug}
+                        meta={'category': " > ".join(new_path), 'slug': category_slug, **self.proxy}
                     )
 
         yield from parse_tree(categories)
@@ -68,7 +69,7 @@ class SofiaSpaSpider(scrapy.Spider):
                 formdata=data,
                 headers=self.headers,
                 callback=self.parse_products,
-                meta={'page': page}
+                meta={'page': page, **self.proxy}
             )
 
     def parse_products(self, response):

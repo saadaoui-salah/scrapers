@@ -5,7 +5,6 @@ from core.playwright.playwright_spider import PlaywrightSpider
 import asyncio
 from http.cookies import SimpleCookie
 
-
 class CasinolistingsSpider(PlaywrightSpider):
     name = "casinolistings"
     start_urls = ["https://www.casinolistings.com/casinos"]
@@ -26,16 +25,29 @@ class CasinolistingsSpider(PlaywrightSpider):
         "upgrade-insecure-requests": "1",
         "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
     }
-    pages = 3
+    pages = 5
     context = 1
 
     def start_requests(self):
-        for i in range(65):
+        for i in range(7):
             yield scrapy.Request(
-                url=f"https://www.askgamblers.com/online-casinos/countries/co/{i+1}",
+                url=f"https://www.askgamblers.com/sports-betting/countries/ireland/{i+1}",
                 headers=self.headers,
                 callback=self.parse,
             )
+        for i in range(7):
+            yield scrapy.Request(
+                url=f"https://www.askgamblers.com/sports-betting/countries/norway/{i+1}",
+                headers=self.headers,
+                callback=self.parse,
+            )
+        for i in range(7):
+            yield scrapy.Request(
+                url=f"https://www.askgamblers.com/sports-betting/countries/canada/{i+1}",
+                headers=self.headers,
+                callback=self.parse,
+            )
+        
         
     def parse(self, response):
         for casino in response.css('.ag-card > a'):

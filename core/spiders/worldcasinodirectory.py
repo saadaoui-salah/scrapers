@@ -23,39 +23,28 @@ class WorldcasinodirectorySpider(scrapy.Spider):
     }
 
     def start_requests(self):
-        for region in [4,5,9,7, 15,3, 13,2,8,6,14]:
+        for i in range(1,8):
             yield scrapy.Request(
-                url=f'https://www.worldcasinodirectory.com/api?region={region}&offset=0&limit=12&order[slots]=DESC', 
+                url=f'https://sbcdirectory.com/?page={i}&pageSize=100', 
                 headers=self.custom_headers,
                 callback=self.parse_contries,
-                meta={'region': region}
             )
         
     def parse_contries(self, response):
-        data = response.json()
-        for item in data['items']:
-            url = f'https://www.worldcasinodirectory.com/casino/{item["slug"]}'
+        data = response.css('.company-card-btn::attr(href)')
+        for link in data:
+            url = f'https://sbcdirectory.com{link}'
             yield scrapy.Request(
                 url=url,
                 callback=self.parse_details,
-            )
-        
-        if int(data['count']['offset']) < int(data['count']['total']):
-            region = response.meta['region']
-            offset = int(data['count']['offset']) + 12
-            yield scrapy.Request(
-                url=f'https://www.worldcasinodirectory.com/api?region={region}&offset={offset}&limit=12&order[slots]=DESC', 
-                headers=self.custom_headers,
-                callback=self.parse_contries,
-                meta=response.meta
             )
 
 
 
     def parse_details(self,response):
-        mail = response.xpath("//p/strong[contains(text(), 'Email')]/../a/@href").get('').replace('mailto:', '')
-        website = response.xpath("//p/strong[contains(text(), 'Website')]/../a/@href").get('')
-        name = response.css('.cDescription.mobile-padding  h2.bonusesTitle::text').get()
+        mail = response.xpath("//a[contains(@href, 'mailto')]/@href").get('').replace('mailto:', '')
+        website = response.css(".row .links a.c-7[target='_blank']::attr(href)").get('')
+        name = response.css('.company-name::text').get()
         if mail and website and name:
             yield {
                 'email': mail,

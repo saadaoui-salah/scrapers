@@ -1,5 +1,7 @@
 import jmespath
 import scrapy
+from core.utils.search import find_emails
+
 
 class Post(scrapy.Item):
     text = scrapy.Field()
@@ -7,8 +9,8 @@ class Post(scrapy.Item):
 
 class LinkedInSpider(scrapy.Spider):
     name = "linkedin"
-    api_url = "https://www.linkedin.com/voyager/api/graphql?includeWebMetadata=true'\
-    '&variables=(count:20,start:{},profileUrn:urn%3Ali%3Afsd_profile%3AACoAAAewlu4B9UDPJO4tgKaMPfpB5vXdHtKaTBE{})&queryId=voyagerFeedDashProfileUpdates.830a03d7b9dce5706757aeea42dfec0b"
+    api_url = "https://www.linkedin.com/voyager/api/graphql?"\
+        "variables=(count:10,start:{},moduleKey:ORGANIZATION_MEMBER_FEED_DESKTOP,organizationalPageUrn:urn%3Ali%3Afsd_organizationalPage%3A99450908)&queryId=voyagerFeedDashOrganizationalPageUpdates.18637dddbaa3f548f490aa51105a241b"
     headers = {
         "Host": "www.linkedin.com",
         "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0",
@@ -31,26 +33,31 @@ class LinkedInSpider(scrapy.Spider):
         "li_at": "AQEDATDhe-kEX6YEAAABlYMrCTYAAAGVpzeNNk4AZI8BIpUDdRcQDoUQLuF-3cuaVbgarvgHWXEhZDQvIjoieLVTGbGDOsj7uuM55drAUzWPXAf3h0Q0uuqk3UlqU3uRMR0eFTBXoPdC7iYTiWmGuzHp"
     }
     page = 0
+    emails = []
 
     def start_requests(self):
-        yield scrapy.Request(url=self.api_url.format(self.page, ''), headers=self.headers, callback=self.parse, cookies=self.cookies)
+        yield scrapy.Request(url=self.api_url.format(self.page), headers=self.headers, callback=self.parse, cookies=self.cookies)
 
     def parse(self, response):
         data = response.json()['data']
         posts = filter(lambda x: x.get('metadata', {}).get('actionsPosition','') == 'ACTOR_COMPONENT',response.json()['included'])
         for post in posts:
-            item = Post()
-            if post['commentary']:
-                item['text'] = post['commentary']['text']['text']
-            try:
-                image = post['content']['imageComponent']['images'][0]['attributes'][0]['detailData']['vectorImage']
-                item['image'] = f"{image['rootUrl']}{image['artifacts'][-1]['fileIdentifyingUrlPathSegment']}"
-            except Exception as e:
-                print(e)
-                pass
-            yield item
-        token = data['data']['feedDashProfileUpdatesByMemberShareFeed']['metadata']['paginationToken']
-        if token:
-            self.page += 1
-            yield scrapy.Request(url=self.api_url.format(self.page, f',paginationToken:{token}'), headers=self.headers, callback=self.parse, cookies=self.cookies)
+            text = post['commentary']['text']['text']
+            emails = find_emails(text)
+            if isinstance(emails, str) and emails not in self.emails:
+                yield {
+                    'email': emails,
+                    'name': post['actor']['name']['text']
+                }
+                continue
+            for email in emails:
+                if emails in self.emails:
+                    continue
+                yield {
+                    'email': email,
+                    'name': post['actor']['name']['text']
+                }
+
+        self.page += 1
+        yield scrapy.Request(url=self.api_url.format(self.page), headers=self.headers, callback=self.parse, cookies=self.cookies)
 
