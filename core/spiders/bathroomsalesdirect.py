@@ -78,7 +78,7 @@ class BathroomsalesdirectSpider(scrapy.Spider):
         sel = scrapy.Selector(text=response.json()['data']['products'])
         for product in sel.css('.product .border-gray-subtle >  a::attr(href)').getall():
             yield scrapy.Request(url=product, callback=self.parse_pdp)
-        if response.json()['data']['header']['x-wp-totalpages'] < response.meta['page']:
+        if response.json()['data']['header']['x-wp-totalpages'] > response.meta['page']:
             category = response.meta['category']
             page = response.meta['page'] + 1
             payload = MultipartEncoder(
