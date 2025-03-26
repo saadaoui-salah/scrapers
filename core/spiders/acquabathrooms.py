@@ -56,5 +56,5 @@ class AcquabathroomsSpider(scrapy.Spider):
             'price': price,
             'brand': response.css('.product-vendor a::text').get(),
             'url': response.url,
-            'colour': color.replace('\n','').strip(),
+            'colour': color.replace('\n','').strip() if color else None,
         }
