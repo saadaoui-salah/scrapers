@@ -42,11 +42,16 @@ class AcquabathroomsSpider(scrapy.Spider):
             if color:
                 break
 
+        price = response.css('.product-pricing .price__compare-at.visible .money::text').get('').replace('\n','').strip()
+        if not price:
+            price = response.css('.product-pricing .price__current .money::text').get('').replace('\n','').strip()
+
+
         yield {
             'title': response.css('.product-title::text').get(),
             'sku': response.css('span[data-product-sku]::text').get(),
-            'RRP': response.css('.product-pricing .price__current--on-sale .money::text').get().replace('\n','').strip(),
-            'price': response.css('.product-pricing .price__compare-at.visible .money::text').get().replace('\n','').strip(),
+            'RRP': response.css('.product-pricing .price__current--on-sale .money::text').get('').replace('\n','').strip(),
+            'price': price,
             'brand': response.css('.product-vendor a::text').get(),
             'url': response.url,
             'colour': color.replace('\n','').strip(),
