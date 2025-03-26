@@ -8,8 +8,9 @@ class AcquabathroomsSpider(scrapy.Spider):
     def parse(self, response):
         categories = response.css('li.navmenu-item a::attr(href)').getall()
         for category in categories:
+            url = f'https://www.acquabathrooms.com.au{category}'if 'http' not in category else category
             yield scrapy.Request(
-                url=f'https://www.acquabathrooms.com.au{category}',
+                url=url,
                 callback=self.parse_products
             )
 
@@ -18,8 +19,9 @@ class AcquabathroomsSpider(scrapy.Spider):
         products = response.css('.productitem--title a::attr(href)').getall()
         colors = response.css('[data-filter-group="Colour"] .filter-text::text').getall()
         for product in products:
+            url = f'https://www.acquabathrooms.com.au{product}'if 'http' not in product else product
             yield scrapy.Request(
-                url=f'https://www.acquabathrooms.com.au{product}',
+                url=url,
                 callback=self.parse_pdp,
                 meta={'colors': colors}
             )
