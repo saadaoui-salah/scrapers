@@ -30,7 +30,7 @@ class SunskySpider(scrapy.Spider):
 
     def parse_products(self, response):
         category = response.css('.catpath > a::text').getall()
-        category = '>>'.join(category)
+        category = ' >> '.join(category)
         for product in response.css('.shopcart_cont ul.clearfix li'):
             if product.css('.itemNo::attr(value)').get():
                 yield {
