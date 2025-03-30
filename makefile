@@ -13,4 +13,7 @@ json:
 
 
 gen:
-	@scrapy genspider $(spider) $(spider).$(name)  
+	@scrapy genspider $(spider) $(spider).$(name) 
+
+clear:
+	@rm *.log *.json *.csv
