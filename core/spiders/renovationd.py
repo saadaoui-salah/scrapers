@@ -39,7 +39,7 @@ class RenovationdSpider(scrapy.Spider):
             'title': response.css('.productView-title::text').get(),
             'sku': response.css('[data-product-sku]::text').get(),
             'brand': response.css('[data-product-brand] a span::text').get(),
-            'colour': response.xpath("//dt[contains(text(), 'Color')]/following-sibling::*[1]").get(),
+            'colour': response.xpath("//dt[contains(text(), 'Color')]/following-sibling::*[1]::text").get(),
             'price': response.css('.productView-details .price--withoutTax::text').get(),
             'RRP': response.css('.productView-details .price--rrp::text').get('').replace('\n','').strip(),
             'url': response.url,
