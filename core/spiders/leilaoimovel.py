@@ -116,7 +116,7 @@ class LeilaoimovelSpider(scrapy.Spider):
             data = self.update_payload(response)['payload']
             data['hdnimovel'] = list_id.split('detalhe_imovel(')[1].split('); return false')[0]
             yield scrapy.FormRequest('https://venda-imoveis.caixa.gov.br/sistema/detalhe-imovel.asp', 
-            method="POST", headers=self.headers, 
+            method="POST", headers=self.headers, meta=response.meta,
             formdata=data, callback=self.parse_details)
 
     def parse_details(self, response):
@@ -131,10 +131,25 @@ class LeilaoimovelSpider(scrapy.Spider):
         public_area = response.xpath("//span[contains(text(), 'Área do terreno')]/strong/text()").get()
         type_ = response.xpath("//span[contains(text(), 'Tipo de imóvel')]/strong/text()").get()
         values = response.xpath("//p[contains(text(), 'Valor')]").get().split('<br>')
-        film_1 = response.xpath("//span[contains(text(), 'Data do 1º Leilão')]/text()").get('').split('-')
-        film_1 = '-'.join(film_1[1:])
-        film_2 = response.xpath("//span[contains(text(), 'Data do 2º Leilão')]/text()").get('').split('-')
-        film_2 = '-'.join(film_2[1:])
+
+        fim_venda_online = response.xpath("//span[contains(text(), 'Data da Licitação Aberta')]/text()").get('').split('-')
+        if len(fim_venda_online) > 1:
+            fim_venda_online = '-'.join(fim_venda_online[1:])
+        else:
+            fim_venda_online = None
+
+        fim_1 = response.xpath("//span[contains(text(), 'Data do 1º Leilão')]/text()").get('').split('-')
+        fim_1 = '-'.join(fim_1[1:])
+        fim_2 = response.xpath("//span[contains(text(), 'Data do 2º Leilão')]/text()").get('').split('-')
+        fim_2 = '-'.join(fim_2[1:])
+
+        if response.meta['modality'] == 'Venda Direta Online':
+            fim_1 = fim_1 or 'N/A'
+            fim_2 = fim_2 or 'N/A'
+        else:
+            fim_1 = fim_1 or '-'
+            fim_2 = fim_2 or '-'
+        
         description = response.xpath("//strong[contains(text(), 'Descrição')]/../text()").get()
         title = response.css('h5::text').get()
         inscricao_imobiliaria = response.xpath("//span[contains(text(), 'Inscrição imobiliária')]/strong/text()").get()
@@ -149,15 +164,20 @@ class LeilaoimovelSpider(scrapy.Spider):
         js_code = response.xpath("//script[contains(text(), 'regrasVendaOnline')]/text()").get('')
         pattern = r'(?<!\/\/)window\.open\(["\']([^"\']+)["\']\)'
         matches = re.findall(pattern, js_code)
-        regras_de_venda_url = [url for matche in matches if '/editais/regras-VOL/' in matche]
-        regras_de_venda_url = regras_de_venda_url if regras_de_venda_url else "N/A"
+        regras_de_venda_url = [f"https://venda-imoveis.caixa.gov.br{matche}" for matche in matches if '/editais/regras-VOL/' in matche]
+        regras_de_venda_url = regras_de_venda_url[0] if regras_de_venda_url else "N/A"
         
+        if not fim_venda_online: 
+            pattern = r'(\d{2}/\d{2}/\d{4} \d{2}:\d{2}:\d{2})'
+            matches = re.search(pattern, js_code)
+            fim_venda_online = matches.group(0) if matches else 'N/A'
+
         edital_url = response.xpath("//a/strong[contains(text(),'Baixar edital e anexos')]/../@onclick").get('')
-        edital_url = edital_url.replace("javascript:ExibeDoc('", '').replace("')")
+        edital_url = edital_url.replace("javascript:ExibeDoc('", '').replace("')",'')
         edital_url = f"https://venda-imoveis.caixa.gov.br{edital_url}" if edital_url else 'N/A' 
         
         matricula_url = response.xpath("//a[contains(text(), 'Baixar matrícula do imóvel')]/@onclick").get('')
-        matricula_url = matricula_url.replace("javascript:ExibeDoc('", '').replace("')")
+        matricula_url = matricula_url.replace("javascript:ExibeDoc('", '').replace("')", '')
         matricula_url = f"https://venda-imoveis.caixa.gov.br{matricula_url}" if matricula_url else 'N/A' 
 
         images = response.css('.thumbnails img::attr(src)').getall()
@@ -188,17 +208,19 @@ class LeilaoimovelSpider(scrapy.Spider):
         item = {
             'url':f'https://venda-imoveis.caixa.gov.br/sistema/detalhe-imovel.asp?hdnOrigem=index&hdnimovel={property_id}',
             'id': property_id,
+            'modality':response.meta['modality'],
             'state': state,
             'city': city,
             'address': address,
-            'quartos': quartos,
-            'garagem': garagem,
+            'quartos': quartos or '-',
+            'garagem': garagem or '-',
             'banheiros': banheiros,
             'private_area':private_area,
-            'public_area':public_area,
+            'total_area':public_area or '-',
             'type':type_,
-            'film_1': film_1,
-            'film_2': film_2,
+            'fim_1': fim_1,
+            'fim_2': fim_2,
+            'fim_venda_online':fim_venda_online,
             'description': description,
             'aceita_financiamento':aceita_financiamento,
             'aceita_FGTS':aceita_FGTS,
@@ -219,7 +241,13 @@ class LeilaoimovelSpider(scrapy.Spider):
                 item['preco_venda'] = remove_tags(value)
             if 'Valor de avaliação' in value:
                 item['preco_avaliacao'] = remove_tags(value)
-
+            if 'desconto' in value:
+                pattern = r"(\d{1,3}(?:,\d{1,2})?)%"
+                match = re.search(pattern, value)
+                if match:
+                    item['desconto'] = match.group(1)
+                else:
+                    item['desconto'] = "0%"
 
 
         yield item
