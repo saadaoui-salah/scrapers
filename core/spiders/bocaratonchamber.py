@@ -1,9 +1,8 @@
 import scrapy
-
+from urllib.parse import unquote
 
 class BocaratonchamberSpider(scrapy.Spider):
     name = "bocaratonchamber"
-    allowed_domains = ["bocaratonchamber.com"]
     start_urls = ["https://web.bocaratonchamber.com/allcategories"]
 
     def parse(self, response):
@@ -26,11 +25,11 @@ class BocaratonchamberSpider(scrapy.Spider):
 
     def parse_details(self, response):
         facebook = response.xpath('//img[@src="/external/wccontrols/v12/socialmedia/images/32/Facebook.png"]/../@href').get('')
-        facebook = facebook.removeprefix('/external/wcpages/referral.aspx?URL=')
+        facebook = unquote(facebook.removeprefix('/external/wcpages/referral.aspx?URL='))
         linkedin = response.xpath('//img[@src="/external/wccontrols/v12/socialmedia/images/32/LinkedIn.png"]/../@href').get('')
-        linkedin = facebook.removeprefix('/external/wcpages/referral.aspx?URL=')
+        linkedin = unquote(linkedin.removeprefix('/external/wcpages/referral.aspx?URL='))
         instagram = response.xpath('//img[@src="/external/wccontrols/v12/socialmedia/images/32/Instagram.png"]/../@href').get('')
-        instagram = facebook.removeprefix('/external/wcpages/referral.aspx?URL=')
+        instagram = unquote(instagram.removeprefix('/external/wcpages/referral.aspx?URL='))
         phone_number = ' '.join(response.xpath('//span[@class="ListingDetails_Level3_MAINCONTACT"]/text()').getall())
         all_numbers = phone_number.split('|')
         extra = None
