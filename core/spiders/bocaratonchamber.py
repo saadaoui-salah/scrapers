@@ -52,7 +52,7 @@ class BocaratonchamberSpider(scrapy.Spider):
             'website':response.css('.ListingDetails_Level3_SITELINK::attr(href)').get(),
             'first_name':first_name,
             'last_name':last_name,
-            'industry':response.xpath("//div[contains(@class, 'ListingDetails_Level')]/a").getall()[-1],
+            'industry':response.xpath("//div[contains(@class, 'ListingDetails_Level')]/a/text()").getall()[-1],
             'facebook':facebook,
             'instagram':instagram,
             'linkedin':linkedin,
