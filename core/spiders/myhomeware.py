@@ -4,7 +4,6 @@ import xmltodict
 
 class MyhomewareSpider(scrapy.Spider):
     name = "myhomeware"
-    allowed_domains = ["myhomeware.com.au"]
     start_urls = ["https://www.myhomeware.com.au/sitemap_collections_1.xml?from=287293112492&to=314326810796"]
 
     def parse(self, response):
