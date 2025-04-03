@@ -199,7 +199,7 @@ class LeilaoimovelSpider(scrapy.Spider):
             elif 'parcelamento' in bullet.lower():
                 aceita_parcelamento = bullet
                 continue
-            elif 'consorcio' in bullet.lower():
+            elif 'consorcio' in bullet.lower() or 'consórcio' in bullet.lower():
                 aceita_consorcio = bullet
                 continue
             else:
