@@ -41,6 +41,7 @@ class LeilaoimovelSpider(scrapy.Spider):
             'Licitação Aberta':21,
             'Venda Direta Online':34,
             'Venda Online':33,
+            'Leilão SFI - Edital Único':14
         }
         for state in states:
             for mod, value in modality.items():
@@ -112,12 +113,17 @@ class LeilaoimovelSpider(scrapy.Spider):
 
     def parse_properties(self, response):
         ids = response.css('.control-group .control-item span strong a::attr(onclick)').getall()
+        if not ids: 
+            ids = response.css('.control-group .control-item a::attr(onclick)').getall()
         for list_id in ids:
             data = self.update_payload(response)['payload']
-            data['hdnimovel'] = list_id.split('detalhe_imovel(')[1].split('); return false')[0]
-            yield scrapy.FormRequest('https://venda-imoveis.caixa.gov.br/sistema/detalhe-imovel.asp', 
-            method="POST", headers=self.headers, meta=response.meta,
-            formdata=data, callback=self.parse_details)
+            try:
+                data['hdnimovel'] = list_id.split('detalhe_imovel(')[1].split('); return false')[0]
+            except IndexError:
+                continue
+        yield scrapy.FormRequest('https://venda-imoveis.caixa.gov.br/sistema/detalhe-imovel.asp', 
+        method="POST", headers=self.headers, meta=response.meta,
+        formdata=data, callback=self.parse_details)
 
     def parse_details(self, response):
         name = response.css('h5::text').get()
@@ -240,7 +246,9 @@ class LeilaoimovelSpider(scrapy.Spider):
             if 'Valor mínimo de venda 2º Leilão' in value:
                 item['preco_venda'] = remove_tags(value)
             if 'Valor de avaliação' in value:
-                item['preco_avaliacao'] = remove_tags(value)
+                item['preco_avaliacao'] = remove_tags(value).removeprefix('Valor de avaliação: R$ ')
+            if 'Valor mínimo de venda' in value: 
+                item['sale_value'] = remove_tags(value).removeprefix('Valor mínimo de venda: R$ ').split('(')[0].strip()
             if 'desconto' in value:
                 pattern = r"(\d{1,3}(?:,\d{1,2})?)%"
                 match = re.search(pattern, value)

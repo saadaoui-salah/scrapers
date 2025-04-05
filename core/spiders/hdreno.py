@@ -1,5 +1,6 @@
 import scrapy
 from core.spiders.myhomeware import MyhomewareSpider
+import json
 
 class HdrenoSpider(MyhomewareSpider):
     name = "hdreno"
@@ -19,6 +20,20 @@ class HdrenoSpider(MyhomewareSpider):
             )
 
     def parse_pdp(self, response):
+        data = response.css('#bss-po-store-data[type="application/json"]::text').get()
+        data = json.loads(data)
+        product = data['product']
+        if product['option'] == ['Color']:
+            for variant in product['variants']:
+                yield {
+                    'title': variant['name'],
+                    'brand': product['vendor'],
+                    'sku': variant['sku'],
+                    'price': variant['price']/100,
+                    'colour': variant['title'],
+                    'url': response.url,
+                }
+            return
         color = response.xpath("//span[contains(@data-variant-option-name, 'Colour')]/../following-sibling"\
             "::*[1]/div[contains(@class, 'options-selection__option-value--selected')]//input/@value").get()
         if not color:
