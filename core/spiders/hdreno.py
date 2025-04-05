@@ -23,13 +23,17 @@ class HdrenoSpider(MyhomewareSpider):
         data = response.css('#bss-po-store-data[type="application/json"]::text').get()
         data = json.loads(data)
         product = data['product']
-        if product['option'] == ['Color']:
+        color = filter(lambda x: 'color' in x.lower() or 'colour' in x.lower(), product['options'])
+        if len(list(color)):
             for variant in product['variants']:
+                price = variant['price']/100
+                rrp = variant['compare_at_price']/100
                 yield {
                     'title': variant['name'],
                     'brand': product['vendor'],
                     'sku': variant['sku'],
-                    'price': variant['price']/100,
+                    'price': price,
+                    'RRP': rrp if price != rrp else None,
                     'colour': variant['title'],
                     'url': response.url,
                 }
