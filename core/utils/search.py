@@ -4,5 +4,4 @@ def find_emails(text):
     emails = re.search(email_pattern, text)
     if not emails:
         return []
-    print(emails)
     return emails.group()
