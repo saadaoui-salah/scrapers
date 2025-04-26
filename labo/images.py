@@ -22,11 +22,12 @@ def download_and_convert(images):
             print(f"Failed to download {url}: {e}")
 
 # Example usage
-link = input('Enter Url pls :')
-response = requests.get(link)
-images = response.text.split('imgHttps = ')[1].split(';\n    const batoPass')[0]
-image_links = json.loads(images)
-download_and_convert(image_links)
-
-
-
+#link = input('Enter Url pls :')
+#response = requests.get(link)
+#images = response.text.split('imgHttps = ')[1].split(';\n    const batoPass')[0]
+#image_links = json.loads(images)
+#download_and_convert(image_links)
+#
+#
+#
+#

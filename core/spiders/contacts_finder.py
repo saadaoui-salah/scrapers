@@ -6,10 +6,10 @@ from core.utils.search import find_emails
 class ContactsFinderSpider(scrapy.Spider):
     name = "contacts_finder"
 
-    df = read_csv("./leads.csv")
     
     def start_requests(self):
-        data = self.df.to_dict(orient='records')
+        df = read_csv("./leads.csv")
+        data = df.to_dict(orient='records')
         for item in data:
             url = item['Website'] if 'http' in item['Website'] else f"http://{item['Website']}"
             item['whatsapp'] = []

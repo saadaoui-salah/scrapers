@@ -123,9 +123,10 @@ class LevraiartisanSpider(scrapy.Spider):
     def parse(self, response):
         posts = response.css('article article[id]')
         for post in posts:
+            sel = scrapy.Selector(text=post.get())
             yield {
-                'phone_number': post.xpath('.//a[contains(@href, "tel:")]/@href').get().removeprefix('tel:'),
-                'email':post.xpath('.//a[contains(@href, "mailto:")]/@href').get().removeprefix('mailto:').split('?')[0],
+                'phone_number': sel.xpath('.//a[contains(@href, "tel:")]/@href').get().removeprefix('tel:'),
+                'email':sel.xpath('.//a[contains(@href, "mailto:")]/@href').get().removeprefix('mailto:').split('?')[0],
                 'name': remove_tags(post.css('a.group.text-gray-800').get()).strip(),
                 'address':remove_tags(post.css('div.text-xs.text-gray-500').get()).strip(),
                 'link': post.css('a.group.text-gray-800::attr(href)').get(),

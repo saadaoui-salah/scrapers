@@ -1,3 +1,4 @@
+import asyncio
 from selenium import webdriver
 import time
 from selenium.webdriver.firefox.options import Options
@@ -9,10 +10,11 @@ from geopy.geocoders import Nominatim
 import pandas as pd
 import numpy as np
 CURRENT_PATH = os.getenv('PWD')
+from playwright.async_api import async_playwright
 
 
 
-async def generate_cookies(self, urls, sleep=10):
+async def generate_cookies(urls=["https://venda-imoveis.caixa.gov.br/"], sleep=10):
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)  # Change to True if you want headless mode
         context = await browser.new_context()
@@ -23,8 +25,6 @@ async def generate_cookies(self, urls, sleep=10):
             await page.wait_for_timeout(sleep*100)  # Wait for the page to load
 
         cookies = await context.cookies()
-        self.cookies = []
-        print(cookies)
         await browser.close()
         return cookies
 
@@ -48,11 +48,6 @@ def read_json(path):
         data = json.loads(file.read())
         return data
 
-def read_json(path):
-    with open(path,'r') as file:
-        data = json.loads(file.read())
-        return data
-
 def read_csv(path):
     import pandas as pd
     df = pd.read_csv(path)
@@ -63,4 +58,3 @@ def handle_nan(value):
     if isinstance(value, float) and np.isnan(value):  # Check if the value is NaN
         return None  # Replace NaN with None (SQL NULL)
     return value
-

@@ -1,10 +1,12 @@
 import scrapy
 from w3lib.html import remove_tags
 import re
+from core.utils.utils import read_csv
+from core.spiders.hipages import headers
 
 class LeilaoimovelSpider(scrapy.Spider):
     name = "leilaoimovel"
-    start_urls = ["https://venda-imoveis.caixa.gov.br/sistema/busca-imovel.asp?sltTipoBusca=imoveis"]
+    start_urls = ["https://venda-imoveis.caixa.gov.br/listaweb/Lista_imoveis_geral.csv"]
     url = "https://venda-imoveis.caixa.gov.br/sistema/carregaPesquisaImoveis.asp"
     headers = {
         "accept": "*/*",
@@ -27,103 +29,28 @@ class LeilaoimovelSpider(scrapy.Spider):
     }
 
     def start_requests(self):
+        headers = self.headers.copy()
+        del headers['content-type']
         yield scrapy.Request(
             url=self.start_urls[0],
             headers=self.headers,
-            callback=self.parse
+            callback=self.parse,
+            meta={'download_timeout': 600},
         )
 
     def parse(self, response):
-        states = response.css('select[name="cmb_estado"] option::attr(value)').getall()
-        modality = {
-            '1º Leilão SFI':4,
-            '2º Leilão SFI':5,
-            'Licitação Aberta':21,
-            'Venda Direta Online':34,
-            'Venda Online':33,
-            'Leilão SFI - Edital Único':14
-        }
-        for state in states:
-            for mod, value in modality.items():
-                pdp_data = {
-                    "cmb_estado": state,
-                    "cmb_cidade": "",
-                    "cmb_modalidade": str(value),
-                    "cmb_tp_imovel": "Selecione",
-                    "cmb_quartos": "Selecione",
-                    "cmb_vg_garagem": "Selecione",
-                    "cmb_area_util": "Selecione",
-                    "cmb_faixa_vlr": "Selecione",
-                    "hdn_estado": state,
-                    "hdn_cidade": "",
-                    "hdn_bairro": "",
-                    "hdn_nobairro": "",
-                    "hdn_nocidade": "",
-                    "hdn_tp_venda": "0",
-                    "hdn_tp_imovel": "Selecione",
-                    "hdn_quartos": "Selecione",
-                    "hdn_vg_garagem": "Selecione",
-                    "hdn_area_util": "Selecione",
-                    "hdn_faixa_vlr": "Selecione",
-                    "hdninteresse": "",
-                    "hdn_modalidade": str(value),
-                    "hdnNumLicit": "",
-                    "hdnSgComissao": "",
-                    "hdnNumTipoVenda": "0",
-                    "hdnValorSimulador": "",
-                    "hdnAceitaFGTS": "",
-                    "hdnAceitaFinanciamento": "",
-                    "hdnorigem": "buscaimovel",
-                }
-                data = {
-                    "hdn_estado": state,
-                    "hdn_cidade": "",
-                    "hdn_bairro": "",
-                    "hdn_tp_venda": str(value),
-                    "hdn_tp_imovel": "Selecione",
-                    "hdn_area_util": "Selecione",
-                    "hdn_faixa_vlr": "Selecione",
-                    "hdn_quartos": "Selecione",
-                    "hdn_vg_garagem": "Selecione",
-                    "strValorSimulador": "",
-                    "strAceitaFGTS": "",
-                    "strAceitaFinanciamento": ""
-                }
-                yield scrapy.FormRequest(self.url, method="POST", headers=self.headers, 
-                formdata=data, callback=self.parse_pagination, meta={'modality': mod, 'payload':pdp_data})
-
-    def update_payload(self, response):
-        pdp_data = response.meta['payload']
-        inputs = response.css('input')
-        for inpt in inputs:
-            key = inpt.css('::attr(name)').get()
-            value = inpt.css('::attr(value)').get()
-            pdp_data[str(key)] = str(value)
-        response.meta['payload'] = pdp_data
-        return response.meta
-
-    def parse_pagination(self, response):
-        ids = response.xpath('//input[contains(@id, "hdnImov")]/@value').getall()
-        for list_id in ids:
-            response.meta['ids'] = list_id
-            data = {'hdnImov': list_id}
-            yield scrapy.FormRequest('https://venda-imoveis.caixa.gov.br/sistema/carregaListaImoveis.asp', 
-            method="POST", headers=self.headers, 
-            formdata=data, callback=self.parse_properties, meta=self.update_payload(response))
-
-    def parse_properties(self, response):
-        ids = response.css('.control-group .control-item span strong a::attr(onclick)').getall()
-        if not ids: 
-            ids = response.css('.control-group .control-item a::attr(onclick)').getall()
-        for list_id in ids:
-            data = self.update_payload(response)['payload']
+        lines = response.text.split('\n')[4:]
+        for line in lines:
             try:
-                data['hdnimovel'] = list_id.split('detalhe_imovel(')[1].split('); return false')[0]
+                line = line.split(';')
+                data = {'hdnimovel': line[0].strip()}
+                meta = {'modality': line[9], 'bairro': line[3]}
             except IndexError:
                 continue
-        yield scrapy.FormRequest('https://venda-imoveis.caixa.gov.br/sistema/detalhe-imovel.asp', 
-        method="POST", headers=self.headers, meta=response.meta,
-        formdata=data, callback=self.parse_details)
+            yield scrapy.FormRequest('https://venda-imoveis.caixa.gov.br/sistema/detalhe-imovel.asp', 
+                method="POST", headers=self.headers, meta=meta,
+                formdata=data, callback=self.parse_details)
+
 
     def parse_details(self, response):
         name = response.css('h5::text').get()
@@ -135,6 +62,8 @@ class LeilaoimovelSpider(scrapy.Spider):
         banheiros = '-'
         private_area = response.xpath("//span[contains(text(), 'Área privativa')]/strong/text()").get()
         public_area = response.xpath("//span[contains(text(), 'Área do terreno')]/strong/text()").get()
+        if not public_area:
+            public_area = response.xpath("//span[contains(text(), 'Área total')]/strong/text()").get()
         type_ = response.xpath("//span[contains(text(), 'Tipo de imóvel')]/strong/text()").get()
         values = response.xpath("//p[contains(text(), 'Valor')]").get().split('<br>')
 
@@ -226,6 +155,7 @@ class LeilaoimovelSpider(scrapy.Spider):
             'type':type_,
             'fim_1': fim_1,
             'fim_2': fim_2,
+            'bairro': response.meta['bairro'],
             'fim_venda_online':fim_venda_online,
             'description': description,
             'aceita_financiamento':aceita_financiamento,
@@ -248,7 +178,7 @@ class LeilaoimovelSpider(scrapy.Spider):
             if 'Valor de avaliação' in value:
                 item['preco_avaliacao'] = remove_tags(value).removeprefix('Valor de avaliação: R$ ')
             if 'Valor mínimo de venda' in value: 
-                item['sale_value'] = remove_tags(value).removeprefix('Valor mínimo de venda: R$ ').split('(')[0].strip()
+                item['sale_value'] = remove_tags(value).removeprefix('Valor mínimo de venda: R$ ').split('(')[0].strip().removeprefix('Valor mínimo de venda 2º Leilão: R$')
             if 'desconto' in value:
                 pattern = r"(\d{1,3}(?:,\d{1,2})?)%"
                 match = re.search(pattern, value)

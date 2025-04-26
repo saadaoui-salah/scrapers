@@ -97,6 +97,3 @@ def parse_details():
         ).text
         csv_file.writerow([riferimento, peso, '>'.join(res['path'])])
     file.close()
-
-print('stating bot ...')
-parse_details()
