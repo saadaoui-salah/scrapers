@@ -110,7 +110,7 @@ class QatarcidSpider(scrapy.Spider):
             headers=self.api_headers,
             formdata=self.data,
             callback=self.parse_chambres,
-            meta={'value':value, **response.meta}
+            meta=response.meta
         )
 
     def parse_chambres(self, response):
