@@ -65,48 +65,55 @@ class QatarcidSpider(scrapy.Spider):
             callback=self.parse,
             headers=self.headers
         )
-
     def parse(self, response):
-        links = response.css('.pointfinder-terms-archive > li > a::text').getall()
-        for link in links:
-            value = response.xpath(f'//option[contains(.,"{link}")]/@value').get()
-            self.url = 'https://qatarcid.com/wp-content/plugins/pointfindercoreelements/includes/pfajaxhandler.php'
-            self.api_headers = {
-                'accept': 'text/html, */*; q=0.01',
-                'accept-language': 'fr-FR,fr;q=0.9,ar-DZ;q=0.8,ar;q=0.7,en-US;q=0.6,en;q=0.5',
-                'cache-control': 'no-cache',
-                'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                'cookie': 'PHPSESSID=fb367b2468388634f958729bb4a15376',
-                'dnt': '1',
-                'origin': 'https://qatarcid.com',
-                'pragma': 'no-cache',
-                'priority': 'u=1, i',
-                'referer': 'https://qatarcid.com/listings/industry/',
-                'sec-ch-ua': '"Google Chrome";v="129", "Not=A?Brand";v="8", "Chromium";v="129"',
-                'sec-ch-ua-mobile': '?0',
-                'sec-ch-ua-platform': '"Linux"',
-                'sec-fetch-dest': 'empty',
-                'sec-fetch-mode': 'cors',
-                'sec-fetch-site': 'same-origin',
-                'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
-                'x-requested-with': 'XMLHttpRequest',
-            }
-            data = self.data.copy()
-            data['dtx[1][value]'] = value
-            yield scrapy.FormRequest(
-                url=self.url,
-                headers=self.api_headers,
-                formdata=self.data,
-                callback=self.parse_chambres,
-                meta={'value':value}
+        values = response.css('option.pfoptheader::attr(value)').getall()
+        links = response.css('.pointfinder-terms-archive > li > a::attr(href)').getall()
+        import json
+        sec = response.css('#theme-scriptspf-js-extra::text').get()
+        sec = json.loads(sec.split('var theme_scriptspf =')[-1].split(';')[0])
+        sec = sec['pfget_listitems']
+        for link, value in zip(links, values):
+            yield scrapy.Request(
+                url=link,
+                callback=self.parse_link,
+                headers=self.headers,
+                meta={'sec':sec, 'value':value}
             )
 
+    def parse_link(self, response):
+        self.url = 'https://qatarcid.com/wp-content/plugins/pointfindercoreelements/includes/pfajaxhandler.php'
+        self.api_headers = {
+            'accept': 'text/html, */*; q=0.01',
+            'accept-language': 'fr-FR,fr;q=0.9,ar-DZ;q=0.8,ar;q=0.7,en-US;q=0.6,en;q=0.5',
+            'cache-control': 'no-cache',
+            'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            'cookie': 'PHPSESSID=fb367b2468388634f958729bb4a15376',
+            'dnt': '1',
+            'origin': 'https://qatarcid.com',
+            'pragma': 'no-cache',
+            'priority': 'u=1, i',
+            'referer': response.url,
+            'sec-ch-ua': '"Google Chrome";v="129", "Not=A?Brand";v="8", "Chromium";v="129"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Linux"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-origin',
+            'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
+            'x-requested-with': 'XMLHttpRequest',
+        }
+        data = self.data.copy()
+        data['dtx[1][value]'] = response.meta['value']
+        data['security'] = response.meta['sec']
+        yield scrapy.FormRequest(
+            url=self.url,
+            headers=self.api_headers,
+            formdata=self.data,
+            callback=self.parse_chambres,
+            meta={'value':value, **response.meta}
+        )
+
     def parse_chambres(self, response):
-        import json
-        """  if not self.sec.get(response.meta['value']):
-            sec = response.css('#theme-scriptspf-js-extra::text').get()
-            sec = json.loads(sec.split('var theme_scriptspf =')[-1].split(';')[0])
-            self.sec[response.meta['value']] = sec['pfget_listitems']  """
         detail_links = response.css('.pflineclamp-title > a::attr(href)').getall()
         for link in detail_links:
             yield scrapy.Request(
@@ -121,7 +128,7 @@ class QatarcidSpider(scrapy.Spider):
             data = self.data.copy()
             data['dtx[1][value]'] = response.meta['value'] 
             data['page'] = link.args['page'] 
-            data['page'] = link.args['page'] 
+            data['security'] = response.meta['sec'] 
             yield scrapy.FormRequest(
                 url=self.url,
                 headers=self.api_headers,
