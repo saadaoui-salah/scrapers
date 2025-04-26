@@ -27,6 +27,7 @@ class LeilaoimovelSpider(scrapy.Spider):
         "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
         "x-requested-with": "XMLHttpRequest"
     }
+    proxy = 'burp'
 
     def start_requests(self):
         headers = self.headers.copy()
