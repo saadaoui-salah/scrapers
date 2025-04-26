@@ -36,20 +36,26 @@ class RedfinSpider(scrapy.Spider):
 
     def parse(self, response):
         import json
-        data = json.loads(response.text.replace('{}&&',''))
-        homes = data['payload']['homes']
-        for home in homes:
-            yield scrapy.Request(
-                url=f"https://www.redfin.com{home['url']}",
-                headers=self.headers,
-                callback=self.parse_details,
-            )
+        try:
+            data = json.loads(response.text.replace('{}&&',''))
+            homes = data['payload']['homes']
+            for home in homes:
+                yield scrapy.Request(
+                    url=f"https://www.redfin.com{home['url']}",
+                    headers=self.headers,
+                    callback=self.parse_details,
+                )
+        except:
+            print(response.text)
 
     def parse_details(self, response):
         location = response.css('[data-rf-test-id="abp-cityStateZip"]::text').getall()
         street_address = response.css('[data-rf-test-id="abp-streetLine"]::attr(title)').get()
-        city = location[0]
-        state, zip_ = location[2], location[-1] 
+        if location:
+            city = location[0]
+            state, zip_ = location[2], location[-1] 
+        else:
+            state, zip_, city = [None, None, None]
         yield {
             'Street Address':street_address,
             'City':city,
