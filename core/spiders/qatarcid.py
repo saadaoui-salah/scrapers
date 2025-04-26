@@ -24,6 +24,7 @@ class QatarcidSpider(scrapy.Spider):
         "upgrade-insecure-requests": "1",
         "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
     }
+    sec = {}
 
     def start_requests(self):
         yield scrapy.Request(
@@ -87,7 +88,7 @@ class QatarcidSpider(scrapy.Spider):
                 'pfcontainershow': '.pfsearchgridview',
                 'page': '',
                 'from': 'halfmap',
-                'security': 'd43384a4ca',
+                'security': '006bcd06cf',
                 'pflat': 'undefined',
                 'pflng': 'undefined',
                 'ohours': ''
@@ -102,10 +103,17 @@ class QatarcidSpider(scrapy.Spider):
             )
 
     def parse_chambres(self, response):
+        import json
+        """  if not self.sec.get(response.meta['value']):
+            sec = response.css('#theme-scriptspf-js-extra::text').get()
+            sec = json.loads(sec.split('var theme_scriptspf =')[-1].split(';')[0])
+            self.sec[response.meta['value']] = sec['pfget_listitems']  """
         detail_links = response.css('.pflineclamp-title > a::attr(href)').getall()
+        print(len(detail_links))
         for link in detail_links:
             yield scrapy.Request(
                 url=link,
+                dont_filter=True,
                 callback=self.parse_details,
                 headers=self.headers
             )
@@ -114,6 +122,8 @@ class QatarcidSpider(scrapy.Spider):
             link = furl(next_page)
             self.data['dtx[1][value]'] = response.meta['value'] 
             self.data['page'] = link.args['page'] 
+            self.data['page'] = link.args['page'] 
+            print('hey', response.meta['value'], link.args['page'])
             yield scrapy.FormRequest(
                 url=self.url,
                 headers=self.api_headers,
