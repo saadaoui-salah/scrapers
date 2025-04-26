@@ -24,7 +24,40 @@ class QatarcidSpider(scrapy.Spider):
         "upgrade-insecure-requests": "1",
         "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
     }
-    sec = {}
+    data = {
+        'action': 'pfget_listitems',
+        'act': '',
+        'dt': '',
+        'dtx[0][name]': 'post_tags',
+        'dtx[0][value]': '',
+        'dtx[1][name]': 'pointfinderltypes',
+        'dtx[1][value]': '',
+        'dtx[2][name]': 'pointfinderlocations',
+        'dtx[2][value]': '',
+        'dtx[3][name]': 'pointfinderconditions',
+        'dtx[3][value]': '',
+        'dtx[4][name]': 'pointfinderitypes',
+        'dtx[4][value]': '',
+        'dtx[5][name]': 'pointfinderfeatures',
+        'dtx[5][value]': '',
+        'ne': '',
+        'sw': '',
+        'ne2': '',
+        'sw2': '',
+        'cl': '',
+        'grid': '',
+        'pfg_orderby': '',
+        'pfg_order': '',
+        'pfg_number': '',
+        'pfcontainerdiv': '.pfsearchresults',
+        'pfcontainershow': '.pfsearchgridview',
+        'page': '',
+        'from': 'halfmap',
+        'security': '006bcd06cf',
+        'pflat': 'undefined',
+        'pflng': 'undefined',
+        'ohours': ''
+    }
 
     def start_requests(self):
         yield scrapy.Request(
@@ -37,7 +70,6 @@ class QatarcidSpider(scrapy.Spider):
         links = response.css('.pointfinder-terms-archive > li > a::text').getall()
         for link in links:
             value = response.xpath(f'//option[contains(.,"{link}")]/@value').get()
-            print(value)
             self.url = 'https://qatarcid.com/wp-content/plugins/pointfindercoreelements/includes/pfajaxhandler.php'
             self.api_headers = {
                 'accept': 'text/html, */*; q=0.01',
@@ -59,41 +91,8 @@ class QatarcidSpider(scrapy.Spider):
                 'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
                 'x-requested-with': 'XMLHttpRequest',
             }
-            self.data = {
-                'action': 'pfget_listitems',
-                'act': '',
-                'dt': '',
-                'dtx[0][name]': 'post_tags',
-                'dtx[0][value]': '',
-                'dtx[1][name]': 'pointfinderltypes',
-                'dtx[1][value]': value,
-                'dtx[2][name]': 'pointfinderlocations',
-                'dtx[2][value]': '',
-                'dtx[3][name]': 'pointfinderconditions',
-                'dtx[3][value]': '',
-                'dtx[4][name]': 'pointfinderitypes',
-                'dtx[4][value]': '',
-                'dtx[5][name]': 'pointfinderfeatures',
-                'dtx[5][value]': '',
-                'ne': '',
-                'sw': '',
-                'ne2': '',
-                'sw2': '',
-                'cl': '',
-                'grid': '',
-                'pfg_orderby': '',
-                'pfg_order': '',
-                'pfg_number': '',
-                'pfcontainerdiv': '.pfsearchresults',
-                'pfcontainershow': '.pfsearchgridview',
-                'page': '',
-                'from': 'halfmap',
-                'security': '006bcd06cf',
-                'pflat': 'undefined',
-                'pflng': 'undefined',
-                'ohours': ''
-            }
-
+            data = self.data.copy()
+            data['dtx[1][value]'] = value
             yield scrapy.FormRequest(
                 url=self.url,
                 headers=self.api_headers,
@@ -109,7 +108,6 @@ class QatarcidSpider(scrapy.Spider):
             sec = json.loads(sec.split('var theme_scriptspf =')[-1].split(';')[0])
             self.sec[response.meta['value']] = sec['pfget_listitems']  """
         detail_links = response.css('.pflineclamp-title > a::attr(href)').getall()
-        print(len(detail_links))
         for link in detail_links:
             yield scrapy.Request(
                 url=link,
@@ -120,10 +118,10 @@ class QatarcidSpider(scrapy.Spider):
         
         if next_page := response.css('.next.page-numbers::attr(href)').get():
             link = furl(next_page)
-            self.data['dtx[1][value]'] = response.meta['value'] 
-            self.data['page'] = link.args['page'] 
-            self.data['page'] = link.args['page'] 
-            print('hey', response.meta['value'], link.args['page'])
+            data = self.data.copy()
+            data['dtx[1][value]'] = response.meta['value'] 
+            data['page'] = link.args['page'] 
+            data['page'] = link.args['page'] 
             yield scrapy.FormRequest(
                 url=self.url,
                 headers=self.api_headers,
