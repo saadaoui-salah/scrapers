@@ -72,12 +72,12 @@ class RedfinSpider(scrapy.Spider):
             'Price Per Sqft':response.xpath("//span[contains(.,'Price/Sq.Ft.') and @class='valueType']/../span[1]/text()").get(),
             'Agent Name':response.css('.agent-basic-details--heading span::text').get(),
             'Agent License':''.join(response.css('.agentLicenseDisplay::text').getall()),
-            'Agency':response.css('.agent-basic-details--broker >  span::text').get(),
+            'Agency':remove_tags(response.css('.agent-basic-details--broker').get('')),
             'Agent Phone':response.css('[data-rf-test-id="agentInfoItem-agentPhoneNumber"]::text').get(),
-            'Agent Email':response.css('.email-addresses::text').get(),
+            'Agent Email':remove_tags(response.css('.email-addresses').get('')).replace('(agent)',''),
             'Full Address':f'{street_address} {"".join(location)}',
             'Taxes':response.xpath('//span[contains(.,"Property taxes")]/../span[2]//a/text()').get(),
-            '3D Tour':False,
+            '3D Tour':True if response.xpath("//span[contains(@class, 'ButtonLabel') and contains(text(), '3D Tour')]").get() else False,
             'Description':remove_tags(response.css('[data-rf-test-id="listingRemarks"].remarks').get('')),
             'Listing URL':response.url
         }
