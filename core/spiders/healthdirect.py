@@ -64,8 +64,8 @@ class HealthdirectSpider(scrapy.Spider):
             }
 
         if data['urlParams']['pageNumber'] * 10 < data['healthcareServices']['count']:
-            f = furl(url)
-            f.args['offset'] = f.args['offset'] + 10
+            f = furl(response.url)
+            f.args['offset'] = int(f.args['offset']) + 10
             yield scrapy.Request(
                 url=f.url,
                 callback=self.parse_results
