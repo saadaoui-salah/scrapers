@@ -41,7 +41,7 @@ class MedicalregisterSpider(scrapy.Spider):
                 callback=self.parse_details,
             )
 
-        pages = response.xpath("//span[contains(text(), 'Total')]/text()").get('').lower().replace('total ', '').replace('pages ', '')
+        pages = response.xpath("//span[contains(text(), 'Total')]/text()").get('').lower().replace('total ', '').replace(' pages', '')
         if not response.meta.get('paginated') and pages:
             for i in range(int(pages)):
                 yield scrapy.Request(
@@ -54,7 +54,7 @@ class MedicalregisterSpider(scrapy.Spider):
     def parse_details(self, response):
         yield {
             'profile title':  response.css('.profile-title::text').get(),
-            'email':response.xpath("//p[contains(text(), 'Email')]/a/@href").get(),
+            'email':response.xpath("//p[contains(text(), 'Email')]/a/@href").get('').replace('mailto:',''),
             'phone':''.join(response.xpath("//p[contains(text(), 'Phone')]//text()").getall() +\
                 response.xpath("//p[contains(text(), 'Fax')]//text()").getall()),
         }
