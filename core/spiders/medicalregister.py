@@ -24,14 +24,11 @@ class MedicalregisterSpider(scrapy.Spider):
 
 
     def start_requests(self):
-        import string
-        alphabet = list(string.ascii_lowercase)
-        for i in alphabet:
-            yield scrapy.Request(
-                url=f'https://medicalregister.com.au/Advanced-Search.aspx?&TxtDoctorName={i}',
-                headers=self.headers,
-                callback=self.parse,
-            )
+        yield scrapy.Request(
+            url='https://medicalregister.com.au/Advanced-Search.aspx?&TxtSpecialty=Chiropractor',
+            headers=self.headers,
+            callback=self.parse,
+        )
 
     def parse(self, response):
         for slug in response.css('.search-result-full-name a::attr(href)').getall():

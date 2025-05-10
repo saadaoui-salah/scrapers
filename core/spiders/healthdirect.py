@@ -2,14 +2,7 @@ import scrapy
 from urllib.parse import urlencode
 from furl import furl
 PARAMS = [
-    ['pharmacy', '310080006'],
-    ['gp-general-practice', '788007007'],
-    ['psychiatry', '310116007'],
-    ['covid-19-vaccine-clinic', '1575161000168105'],
-    ['physiotherapy', '722140001'],
-    ['pathology', '310074003'],
-    ['hospitals', '1223151000168101'],
-    ['urgent-care-service', '1646051000168105'],
+    ['chiropractor', '722170006'],
 ]
 
 

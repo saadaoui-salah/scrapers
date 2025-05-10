@@ -11,22 +11,29 @@ import pandas as pd
 import numpy as np
 CURRENT_PATH = os.getenv('PWD')
 from playwright.async_api import async_playwright
+from playwright.sync_api import sync_playwright
+from threading import Thread
+import queue
 
+def generate_cookies(urls=["https://venda-imoveis.caixa.gov.br/"], sleep=10):
+    result_queue = queue.Queue()
 
+    def run():
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context()
+            page = context.new_page()
+            for url in urls:
+                page.goto(url)
+                page.wait_for_timeout(sleep * 100)  # 100ms unit
+            cookies = context.cookies()
+            browser.close()
+            result_queue.put(cookies)
 
-async def generate_cookies(urls=["https://venda-imoveis.caixa.gov.br/"], sleep=10):
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)  # Change to True if you want headless mode
-        context = await browser.new_context()
-        page = await context.new_page()
-        await page.wait_for_timeout(sleep*100)  # Wait for the page to load
-        for url in urls:
-            await page.goto(url)
-            await page.wait_for_timeout(sleep*100)  # Wait for the page to load
-
-        cookies = await context.cookies()
-        await browser.close()
-        return cookies
+    t = Thread(target=run)
+    t.start()
+    t.join()
+    return result_queue.get()
 
 
 def p(urls, sleep=10):
