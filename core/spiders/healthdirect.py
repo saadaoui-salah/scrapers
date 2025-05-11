@@ -36,7 +36,7 @@ class HealthdirectSpider(scrapy.Spider):
                 l = f"{location['label'].replace(' ', '-')}-{location['code']}-{location['state']['label']}"
                 yield scrapy.Request(
                     url="https://www.healthdirect.gov.au/australian-health-services/"\
-                    f"_next/data/77TSRjSFOA5gMKb0N2lUZ/ar/search/{l}/{param[0]}/{param[1]}.json?offset=0&isMapView=false&params={l}&params={param[0]}&params={param[1]}",
+                    f"_next/data/0hqlqw_sMHoo5ug9fabWm/ar/search/{l}/{param[0]}/{param[1]}.json?offset=0&isMapView=false&params={l}&params={param[0]}&params={param[1]}",
                     callback=self.parse_results
                 )
 
