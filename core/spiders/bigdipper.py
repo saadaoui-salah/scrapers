@@ -41,7 +41,7 @@ class BigdipperSpider(scrapy.Spider):
 
     def parse(self, response):
         categories = response.css('a[target="_self"]::attr(href)').getall()
-        for category in categories:
+        for category in categories[:38]:
             if self.domain not in category:
                 yield scrapy.Request(
                     url=f'{self.domain}{category}',
