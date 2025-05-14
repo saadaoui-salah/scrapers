@@ -41,10 +41,18 @@ class BigdipperSpider(scrapy.Spider):
 
     def parse(self, response):
         categories = response.css('a[target="_self"]::attr(href)').getall()
-        for category in categories[:38]:
+        filtred_cats = []
+        for cat in categories:
+            if list(filter(lambda x: cat in x and x != cat, categories)):
+                continue
+            if self.domain in cat:
+                continue
+            filtred_cats += [cat]
+
+        for category in categories:
             if self.domain not in category:
                 yield scrapy.Request(
-                    url=f'{self.domain}{category}',
+                    url=f'{self.domain}{category}?pageID=10000',
                     callback=self.parse_pagination,
                     headers=self.headers,
                 )
