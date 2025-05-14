@@ -51,35 +51,92 @@ class BigdipperSpider(scrapy.Spider):
 
         for category in categories:
             if self.domain not in category:
-                yield scrapy.Request(
-                    url=f'{self.domain}{category}?pageID=10000',
-                    callback=self.parse_pagination,
+                self.url = 'https://bigdipper.no/api/AreaRenderer/RenderFields'
+                self.headers = {
+                    'accept': 'application/json, text/javascript, */*; q=0.01',
+                    'accept-language': 'fr-FR,fr;q=0.9,ar-DZ;q=0.8,ar;q=0.7,en-US;q=0.6,en;q=0.5',
+                    'cache-control': 'no-cache',
+                    'content-type': 'application/x-www-form-urlencoded',
+                    'dnt': '1',
+                    'origin': 'https://bigdipper.no',
+                    'pragma': 'no-cache',
+                    'priority': 'u=1, i',
+                    'referer': 'https://bigdipper.no/vinyl/nyheter?pageID=3',
+                    'sec-ch-ua': '"Google Chrome";v="129", "Not=A?Brand";v="8", "Chromium";v="129"',
+                    'sec-ch-ua-mobile': '?0',
+                    'sec-ch-ua-platform': '"Linux"',
+                    'sec-fetch-dest': 'empty',
+                    'sec-fetch-mode': 'cors',
+                    'sec-fetch-site': 'same-origin',
+                    'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
+                    'x-requested-with': 'XMLHttpRequest',
+                }
+
+                self.formdata = {
+                    "Data[0][Width]": "727.5",
+                    "Data[0][AreaName]": "CenterContentDynamicAdList",
+                    "Data[0][FieldId]": "1546",
+                    "Data[0][NodeId]": "2002500",
+                    "Data[0][ClientId]": "A100416F1546N2002500",
+                    "Data[0][UseSpecificLayoutId]": "False",
+                    "Data[0][LayoutId]": "120032",
+                    "Data[0][ManufacturerId]": "0",
+                    "Data[0][Plid]": "0",
+                    "Data[0][PlidList]": "",
+                    "Data[0][SendFilterOnly]": "false",
+                    "RequestFilter[NodeId]": "2002500",
+                    "RequestFilter[Url]": f"{category}?pageID=1",
+                    "RequestFilter[Filter]": "",
+                    "RequestFilter[MinPrice]": "",
+                    "RequestFilter[MaxPrice]": "",
+                    "RequestFilter[SearchString]": "",
+                    "RequestFilter[ClientId]": "AttributeListBox",
+                    "RequestFilter[PageIndex]": "1",
+                    "RequestFilter[FilterCacheKey]": "",
+                    "RequestFilter[FilterIsJson]": "false",
+                    "RequestFilter[OtherContactId]": "",
+                    "SkipFilterRendering": "true",
+                    "UseDummyData": "false",
+                    "DeviceSize": "md",
+                    "GetElementsOnly": "true",
+                    "SkipSorter": "false",
+                    "CurrentArticle": "0",
+                    "PopupFilter": "0"
+                }
+
+                yield scrapy.FormRequest(
+                    url=self.url,
+                    method='POST',
                     headers=self.headers,
+                    formdata=self.formdata,
+                    meta={'category':category},
+                    callback=self.parse_pagination
                 )
-
     def parse_pagination(self, response):
-        total = len(response.css('.AddProductImage'))
-        if total == response.meta.get('total', 0):
-            yield from self.parse_products(response)
-            return
-        f = furl(response.url)
-        f.args['pageID'] = int(f.args.get('pageID', 1)) + 1
-
-        yield scrapy.Request(
-            url=f.url,
-            callback=self.parse_pagination,
-            headers=self.headers,
-            meta={'total': total}
-        )
-
-    def parse_products(self, response):
-        slugs = response.css('.AddProductImage > a::attr(href)')
+        data = response.json()
+        sel = scrapy.Selector(text=data['Data'][0]['Response'])
+        slugs = sel.css('.AddProductImage > a::attr(href)')
         for slug in slugs:
             yield scrapy.Request(
                 url=f"{self.domain}{slug}",
                 callback=self.parse_pdp,
                 headers=self.headers,
             )   
+        if data['PagesRemaining'] > 0:
+            f = furl(response.url)
+            page = int(f.args.get('pageID', 1)) + 1
+            data = self.formdata.copy()
+            data['RequestFilter[PageIndex]'] = str(page) 
+            data['RequestFilter[Url]'] = f"{response.meta['category']}?pageID={page}" 
+            yield scrapy.FormRequest(
+                url=self.url,
+                method='POST',
+                headers=self.headers,
+                meta=response.meta,
+                formdata=self.formdata,
+                callback=self.parse_pagination
+            )
+
 
     def parse_pdp(self, response):
         data = response.xpath("//script[contains(text(), 'EAN')]/text()").get('').replace('dataLayer.push(', '').replace(');', '')
