@@ -6,7 +6,7 @@ from w3lib.html import remove_tags
 class BigdipperSpider(scrapy.Spider):
     name = "bigdipper"
     domain = 'https://bigdipper.no'
-    headers = {
+    global_headers = {
         "pragma": "no-cache",
         "cache-control": "no-cache",
         "sec-ch-ua": '"Google Chrome";v="129", "Not=A?Brand";v="8", "Chromium";v="129"',
@@ -31,87 +31,114 @@ class BigdipperSpider(scrapy.Spider):
         "priority": "u=0, i" 
     }
 
+    black_list = [
+        'https://bigdipper.no/gavekort'
+    ]
+
 
     def start_requests(self):
         yield scrapy.Request(
             url='https://bigdipper.no/api/Menu/GetHtmlMenu?nodeId=2001589&screensize=sm&screensizePixels=768&width=1920&height=1080&showMobileMenuCollapsed=false&_=1746827350247',
-            headers=self.headers,
-            callback=self.parse,
+            headers=self.global_headers,
+            callback=self.parse_categories,
         )
 
-    def parse(self, response):
-        categories = response.css('a[target="_self"]::attr(href)').getall()
-        filtred_cats = []
-        for cat in categories:
-            if list(filter(lambda x: cat in x and x != cat, categories)):
-                continue
-            if self.domain in cat:
-                continue
-            filtred_cats += [cat]
 
-        for category in categories:
-            if self.domain not in category:
-                self.url = 'https://bigdipper.no/api/AreaRenderer/RenderFields'
-                self.headers = {
-                    'accept': 'application/json, text/javascript, */*; q=0.01',
-                    'accept-language': 'fr-FR,fr;q=0.9,ar-DZ;q=0.8,ar;q=0.7,en-US;q=0.6,en;q=0.5',
-                    'cache-control': 'no-cache',
-                    'content-type': 'application/x-www-form-urlencoded',
-                    'dnt': '1',
-                    'origin': 'https://bigdipper.no',
-                    'pragma': 'no-cache',
-                    'priority': 'u=1, i',
-                    'referer': 'https://bigdipper.no/vinyl/nyheter?pageID=3',
-                    'sec-ch-ua': '"Google Chrome";v="129", "Not=A?Brand";v="8", "Chromium";v="129"',
-                    'sec-ch-ua-mobile': '?0',
-                    'sec-ch-ua-platform': '"Linux"',
-                    'sec-fetch-dest': 'empty',
-                    'sec-fetch-mode': 'cors',
-                    'sec-fetch-site': 'same-origin',
-                    'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
-                    'x-requested-with': 'XMLHttpRequest',
-                }
-
-                self.formdata = {
-                    "Data[0][Width]": "727.5",
-                    "Data[0][AreaName]": "CenterContentDynamicAdList",
-                    "Data[0][FieldId]": "1546",
-                    "Data[0][NodeId]": "2002500",
-                    "Data[0][ClientId]": "A100416F1546N2002500",
-                    "Data[0][UseSpecificLayoutId]": "False",
-                    "Data[0][LayoutId]": "120032",
-                    "Data[0][ManufacturerId]": "0",
-                    "Data[0][Plid]": "0",
-                    "Data[0][PlidList]": "",
-                    "Data[0][SendFilterOnly]": "false",
-                    "RequestFilter[NodeId]": "2002500",
-                    "RequestFilter[Url]": f"{category}?pageID=1",
-                    "RequestFilter[Filter]": "",
-                    "RequestFilter[MinPrice]": "",
-                    "RequestFilter[MaxPrice]": "",
-                    "RequestFilter[SearchString]": "",
-                    "RequestFilter[ClientId]": "AttributeListBox",
-                    "RequestFilter[PageIndex]": "1",
-                    "RequestFilter[FilterCacheKey]": "",
-                    "RequestFilter[FilterIsJson]": "false",
-                    "RequestFilter[OtherContactId]": "",
-                    "SkipFilterRendering": "true",
-                    "UseDummyData": "false",
-                    "DeviceSize": "md",
-                    "GetElementsOnly": "true",
-                    "SkipSorter": "false",
-                    "CurrentArticle": "0",
-                    "PopupFilter": "0"
-                }
-
-                yield scrapy.FormRequest(
-                    url=self.url,
-                    method='POST',
-                    headers=self.headers,
-                    formdata=self.formdata,
-                    meta={'category':category},
-                    callback=self.parse_pagination
+    def parse_categories(self, response):
+        for cat in response.css('#navbar-collapse-grid .dropdown.mcm-fw'):
+            if not cat.css('ul'):
+                category = cat.css('a::attr(href)').get()
+                url = f"{self.domain}{category}" if self.domain not in category else category
+                if url in self.black_list:
+                    continue
+                yield scrapy.Request(
+                    url=url,
+                    callback=self.parse_results,
+                    headers=self.global_headers,
+                    meta={'category': category}
                 )
+            else:
+                for category in cat.css('.MegaMenuNotPublished .menu-items-container a::attr(href)').getall():
+                    url = f"{self.domain}{category}" if self.domain not in category else category
+                    if url in self.black_list:
+                        continue
+                    yield scrapy.Request(
+                        url=url,
+                        callback=self.parse,
+                        headers=self.global_headers,
+                        meta={'category': category}
+                    )
+
+    def parse(self, response):
+        categories = response.css('.karuselloverskrift a::attr(href)').getall()
+        if categories:
+            for category in categories:
+                url = f"{self.domain}/{category}" if self.domain not in category else category
+                if url in self.black_list:
+                    continue
+                yield scrapy.Request(
+                    url=url,
+                    callback=self.parse_results,
+                    headers=self.global_headers,
+                    meta={'category': category}
+                )
+        else:
+            yield from self.parse_results(response)
+
+    def parse_results(self, response):
+        slugs = response.css('.AddProductImage > a::attr(href)')
+        for slug in slugs:
+            yield scrapy.Request(
+                url=f"{self.domain}{slug}",
+                callback=self.parse_pdp,
+                headers=self.global_headers,
+            )
+        category = response.meta['category']
+        self.url = 'https://bigdipper.no/api/AreaRenderer/RenderFields'
+        self.headers = {
+            'accept': 'application/json, text/javascript, */*; q=0.01',
+            'accept-language': 'fr-FR,fr;q=0.9,ar-DZ;q=0.8,ar;q=0.7,en-US;q=0.6,en;q=0.5',
+            'cache-control': 'no-cache',
+            'content-type': 'application/x-www-form-urlencoded',
+            'dnt': '1',
+            'origin': 'https://bigdipper.no',
+            'pragma': 'no-cache',
+            'priority': 'u=1, i',
+            'sec-ch-ua': '"Google Chrome";v="129", "Not=A?Brand";v="8", "Chromium";v="129"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Linux"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-origin',
+            'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
+            'x-requested-with': 'XMLHttpRequest',
+        }
+
+        self.formdata = {
+            "Data[0][Width]": "727.5",
+            "Data[0][AreaName]": "CenterContentDynamicAdList",
+            "Data[0][FieldId]": response.css('[data-area-id="CenterContentDynamicAdList"]::attr(data-field-id)').get(),
+            "Data[0][NodeId]": response.css('[data-area-id="CenterContentDynamicAdList"]::attr(data-node-id)').get(),
+            "Data[0][ClientId]": response.css('[data-area-id="CenterContentDynamicAdList"]::attr(id)').get(),
+            "Data[0][UseSpecificLayoutId]": "False",
+            "Data[0][LayoutId]": response.css('[data-area-id="CenterContentDynamicAdList"]::attr(data-layoutid)').get(),
+            "Data[0][ManufacturerId]": "0",
+            "Data[0][Plid]": response.css('[data-area-id="CenterContentDynamicAdList"]::attr(data-plid)').get(),
+            "Data[0][SendFilterOnly]": "false",
+            "RequestFilter[NodeId]": response.css('[data-area-id="CenterContentDynamicAdList"]::attr(data-node-id)').get(),
+            "RequestFilter[Url]": f"{category}?pageID=1",
+            "RequestFilter[ClientId]": "AttributeListBox",
+            "RequestFilter[PageIndex]": "1",
+        }
+
+        yield scrapy.FormRequest(
+            url=self.url,
+            method='POST',
+            headers=self.headers,
+            formdata=self.formdata,
+            meta={'category':category, 'data':self.formdata},
+            callback=self.parse_pagination
+        )
     def parse_pagination(self, response):
         data = response.json()
         sel = scrapy.Selector(text=data['Data'][0]['Response'])
@@ -120,12 +147,12 @@ class BigdipperSpider(scrapy.Spider):
             yield scrapy.Request(
                 url=f"{self.domain}{slug}",
                 callback=self.parse_pdp,
-                headers=self.headers,
+                headers=self.global_headers,
             )   
         if data['PagesRemaining'] > 0:
             f = furl(response.url)
             page = int(f.args.get('pageID', 1)) + 1
-            data = self.formdata.copy()
+            data = response.meta['data']
             data['RequestFilter[PageIndex]'] = str(page) 
             data['RequestFilter[Url]'] = f"{response.meta['category']}?pageID={page}" 
             yield scrapy.FormRequest(
