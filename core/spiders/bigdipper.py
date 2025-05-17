@@ -148,21 +148,21 @@ class BigdipperSpider(scrapy.Spider):
                 url=f"{self.domain}{slug}",
                 callback=self.parse_pdp,
                 headers=self.global_headers,
-            )   
-        if data['PagesRemaining'] > 0:
-            f = furl(response.url)
-            page = int(f.args.get('pageID', 1)) + 1
-            data = response.meta['data']
-            data['RequestFilter[PageIndex]'] = str(page) 
-            data['RequestFilter[Url]'] = f"{response.meta['category']}?pageID={page}" 
-            yield scrapy.FormRequest(
-                url=self.url,
-                method='POST',
-                headers=self.headers,
-                meta=response.meta,
-                formdata=self.formdata,
-                callback=self.parse_pagination
             )
+        if not response.meta.get('pagination'):
+            for page in range(data['PagesRemaining']):
+                response.meta['pagination'] = True
+                data = response.meta['data']
+                data['RequestFilter[PageIndex]'] = str(page) 
+                data['RequestFilter[Url]'] = f"{response.meta['category']}?pageID={page}" 
+                yield scrapy.FormRequest(
+                    url=self.url,
+                    method='POST',
+                    headers=self.headers,
+                    meta=response.meta,
+                    formdata=self.formdata,
+                    callback=self.parse_pagination
+                )
 
 
     def parse_pdp(self, response):
