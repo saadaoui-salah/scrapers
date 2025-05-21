@@ -52,15 +52,15 @@ class BigdipperSpider(scrapy.Spider):
                 if url in self.black_list:
                     continue
                 yield scrapy.Request(
-                    url=url,
-                    callback=self.parse_results,
+                    url=f"{url}?pageID=900",
+                    callback=self.parse_pagination,
                     headers=self.global_headers,
                     meta={'category': category}
                 )
             else:
                 for category in cat.css('.MegaMenuNotPublished .menu-items-container a::attr(href)').getall():
                     url = f"{self.domain}{category}" if self.domain not in category else category
-                    if url in self.black_list:
+                    if url in self.black_list or 'vinyl' in url:
                         continue
                     yield scrapy.Request(
                         url=url,
@@ -77,15 +77,19 @@ class BigdipperSpider(scrapy.Spider):
                 if url in self.black_list:
                     continue
                 yield scrapy.Request(
-                    url=url,
-                    callback=self.parse_results,
+                    url=f"{url}?pageID=900",
+                    callback=self.parse_pagination,
                     headers=self.global_headers,
                     meta={'category': category}
                 )
         else:
-            yield from self.parse_results(response)
-
-    def parse_results(self, response):
+            yield scrapy.Request(
+                    url=f"{response.url}?pageID=900",
+                    callback=self.parse_pagination,
+                    headers=self.global_headers,
+                )
+   
+    def parse_pagination(self, response):
         slugs = response.css('.AddProductImage > a::attr(href)')
         for slug in slugs:
             yield scrapy.Request(
@@ -93,76 +97,7 @@ class BigdipperSpider(scrapy.Spider):
                 callback=self.parse_pdp,
                 headers=self.global_headers,
             )
-        category = response.meta['category']
-        self.url = 'https://bigdipper.no/api/AreaRenderer/RenderFields'
-        self.headers = {
-            'accept': 'application/json, text/javascript, */*; q=0.01',
-            'accept-language': 'fr-FR,fr;q=0.9,ar-DZ;q=0.8,ar;q=0.7,en-US;q=0.6,en;q=0.5',
-            'cache-control': 'no-cache',
-            'content-type': 'application/x-www-form-urlencoded',
-            'dnt': '1',
-            'origin': 'https://bigdipper.no',
-            'pragma': 'no-cache',
-            'priority': 'u=1, i',
-            'sec-ch-ua': '"Google Chrome";v="129", "Not=A?Brand";v="8", "Chromium";v="129"',
-            'sec-ch-ua-mobile': '?0',
-            'sec-ch-ua-platform': '"Linux"',
-            'sec-fetch-dest': 'empty',
-            'sec-fetch-mode': 'cors',
-            'sec-fetch-site': 'same-origin',
-            'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
-            'x-requested-with': 'XMLHttpRequest',
-        }
-
-        self.formdata = {
-            "Data[0][Width]": "727.5",
-            "Data[0][AreaName]": "CenterContentDynamicAdList",
-            "Data[0][FieldId]": response.css('[data-area-id="CenterContentDynamicAdList"]::attr(data-field-id)').get(),
-            "Data[0][NodeId]": response.css('[data-area-id="CenterContentDynamicAdList"]::attr(data-node-id)').get(),
-            "Data[0][ClientId]": response.css('[data-area-id="CenterContentDynamicAdList"]::attr(id)').get(),
-            "Data[0][UseSpecificLayoutId]": "False",
-            "Data[0][LayoutId]": response.css('[data-area-id="CenterContentDynamicAdList"]::attr(data-layoutid)').get(),
-            "Data[0][ManufacturerId]": "0",
-            "Data[0][Plid]": response.css('[data-area-id="CenterContentDynamicAdList"]::attr(data-plid)').get(),
-            "Data[0][SendFilterOnly]": "false",
-            "RequestFilter[NodeId]": response.css('[data-area-id="CenterContentDynamicAdList"]::attr(data-node-id)').get(),
-            "RequestFilter[Url]": f"{category}?pageID=1",
-            "RequestFilter[ClientId]": "AttributeListBox",
-            "RequestFilter[PageIndex]": "1",
-        }
-
-        yield scrapy.FormRequest(
-            url=self.url,
-            method='POST',
-            headers=self.headers,
-            formdata=self.formdata,
-            meta={'category':category, 'data':self.formdata},
-            callback=self.parse_pagination
-        )
-    def parse_pagination(self, response):
-        data = response.json()
-        sel = scrapy.Selector(text=data['Data'][0]['Response'])
-        slugs = sel.css('.AddProductImage > a::attr(href)')
-        for slug in slugs:
-            yield scrapy.Request(
-                url=f"{self.domain}{slug}",
-                callback=self.parse_pdp,
-                headers=self.global_headers,
-            )
-        if not response.meta.get('pagination'):
-            for page in range(data['PagesRemaining']):
-                response.meta['pagination'] = True
-                data = response.meta['data']
-                data['RequestFilter[PageIndex]'] = str(page) 
-                data['RequestFilter[Url]'] = f"{response.meta['category']}?pageID={page}" 
-                yield scrapy.FormRequest(
-                    url=self.url,
-                    method='POST',
-                    headers=self.headers,
-                    meta=response.meta,
-                    formdata=self.formdata,
-                    callback=self.parse_pagination
-                )
+       
 
 
     def parse_pdp(self, response):
