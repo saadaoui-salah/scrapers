@@ -24,11 +24,19 @@ class MedicalregisterSpider(scrapy.Spider):
 
 
     def start_requests(self):
-        yield scrapy.Request(
-            url='https://medicalregister.com.au/Advanced-Search.aspx?&TxtSpecialty=Chiropractor',
-            headers=self.headers,
-            callback=self.parse,
-        )
+        for i in ['Ophthalmic%20Surgeon', 'Ophthalmology%20(see%20also%20Surgery%20-%20Ophthalmic)', 'Orthopaedics%20(see%20also%20Surgery%20-%20Orthopaedic)', 
+        'Surgery%20-%20Abdominal', 'Surgery%20-%20Breast', 'Surgery%20-%20Cardiothoracic', 'Surgery%20-%20Colorectal', 'Surgery%20-%20Cosmetic', 'Surgery%20-%20Cosmetic%20and%20Hair%20Transplantation',
+        'Surgery%20-%20Cosmetic,%20Plastic%20&%20Reconstructive', 'Surgery%20-%20Cranio%20Facial', 'Surgery%20-%20Cranio%20Facial', 'Surgery%20-%20Endocrine',
+        'Surgery%20-%20Endovascular', 'Surgery%20-%20Facial%20Nerve%20Reconstruction', 'Surgery%20-%20Foot%20&%20Ankle', 'Surgery%20-%20General', 'Surgery%20-%20General/Endoscopy',
+        'Surgery%20-%20Hand', 'Surgery%20-%20Hand%20&%20Upper%20Limb', 'Surgery%20-%20Hand,%20Wrist%20&%20Upper%20Limb', 'Surgery%20-%20Head%20and%20Neck', 'Surgery%20-%20Knee',
+        'Surgery%20-%20Laparoscopic', 'Surgery%20-%20Microsurgery', 'Surgery%20-%20Neurosurgery', 'Surgery%20-%20Obesity', 'Surgery%20-%20Oesophageal', 'Surgery%20-%20Oncology',
+        'Surgery%20-%20Ophthalmic%20(see%20also%20Ophthalmology/Ophthalmic%20Surgery)', 'Surgery%20-%20Oral/Maxillofacial', 'Surgery%20-%20Orthopaedic', 'Surgery%20-%20Orthopaedic%20(see%20also%20Orthopaedics%20&%20Medico/Legal)',
+        'Surgery%20-%20Paediatric', 'Surgery%20-%20Paediatric%20Orthopaedic', 'Surgery%20-%20Spinal', 'Surgery%20-%20Transplantation', 'Surgery%20-%20Vascular', 'Surgery%20-%20Venous']:
+            yield scrapy.Request(
+                url=f'https://medicalregister.com.au/Advanced-Search.aspx?&TxtSpecialty={i}',
+                headers=self.headers,
+                callback=self.parse,
+            )
 
     def parse(self, response):
         for slug in response.css('.search-result-full-name a::attr(href)').getall():
