@@ -81,14 +81,13 @@ class HealthengineSpider(scrapy.Spider):
 
 
     def start_requests(self):
-        for i in slugs:
-            for page in range(i[1]):
-                yield scrapy.Request(
-                    url=f"https://healthengine.com.au/search/{i[0]}?page={page+1}&onlineAppts=true",
-                    callback=self.parse,
-                    cookies=self.cookies,
-                    headers=self.headers
-                )
+        for page in range(13):
+            yield scrapy.Request(
+                url=f"https://healthengine.com.au/search?page={page}&q=Surgery&onlineAppts=true",
+                callback=self.parse,
+                cookies=self.cookies,
+                headers=self.headers
+            )
 
     def parse(self, response):
         data = response.css('#__NEXT_DATA__::text').get()

@@ -24,14 +24,14 @@ class LondonstockexchangeSpider(scrapy.Spider):
             "sec-fetch-site": "same-site",
             "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
         }
-        for i in range(139):
+        for i in range(162):
             payload = {
                 "path": "news",
-                "parameters": "tab%3Dnews-explorer%26period%3Dcustom%26beforedate%3D20250519%26afterdate%3D20230601%26freetext%3Dtransaction%20in%20own%20shares%26headlinetypes%3D1%2C2%26tabId%3D58734a12-d97c-40cb-8047-df76e660f23f",
+                "parameters": f"tab%3Dnews-explorer%26indices%3DNMX%26period%3Dcustom%26beforedate%3D20250520%26afterdate%3D20230601%26page%3D{i}%26headlinetypes%3D1%2C2%26tabId%3D58734a12-d97c-40cb-8047-df76e660f23f",
                 "components": [
                     {
                         "componentId": "block_content%3A431d02ac-09b8-40c9-aba6-04a72a4f2e49",
-                        "parameters": f"period=custom&beforedate=20250519&afterdate=20230601&freetext=transaction%20in%20own%20shares&page={i}&size=500&sort=datetime,desc"
+                        "parameters": f"indices=NMX&period=custom&beforedate=20250520&afterdate=20230601&page={i}&size=500&sort=datetime,desc"
                     }
                 ]
             }
@@ -52,5 +52,7 @@ class LondonstockexchangeSpider(scrapy.Spider):
             date = item['datetime'].split('T')[0].split('-')
             yield {
                 'Headline': f"{item['companyname']} - {item['companycode']}",
-                'date': f"{date[0][2:]}.{date[1]}.{date[2]}"
+                'date': f"{date[0][2:]}.{date[1]}.{date[2]}",
+                'price': item['lastprice'],
+                'link': f"https://www.londonstockexchange.com/news-article/{item['companycode']}/transaction-in-own-shares/{item['id']}"
             }

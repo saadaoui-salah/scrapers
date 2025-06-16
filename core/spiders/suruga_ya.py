@@ -1,6 +1,7 @@
 import scrapy
 from w3lib.html import remove_tags
 import re
+from core.utils.utils import fetch_sheet
 
 class Product(scrapy.Item):
     url = scrapy.Field()
@@ -13,9 +14,25 @@ class Product(scrapy.Item):
 class SurugaYaSpider(scrapy.Spider):
     name = "suruga-ya"
     allowed_domains = ["suruga-ya.jp"]
-    start_urls = ["https://www.suruga-ya.jp/search?category=50104&search_word=&brand=%E3%82%A4%E3%83%9E%E3%82%A4&is_marketplace=1"]
+    sheet = fetch_sheet("1fG7O_euIj-PTXrsX59POEv1NEqG2CGpkv2p6skn4uDk", "suruga-ya")
 
-    def parse(self, response):
+    def start_requests(self):
+        for row in self.sheet:
+            yield scrapy.Request(
+                url=row['url'],
+                callback=self.parse_price,
+                meta={'item': row}
+            )
+        
+    def parse_price(self, response):
+        item = response.meta['item']
+        item['price'] = remove_tags(response.xpath('//div[@id="tabs-all"]//tr[@class="item"][4]/td[1]//strong[contains(@class,"text-red text-bold mgnL10")]/text()').get("xxx"))
+        ignore_chars = ['\n', '\t', ',', '円']
+        for char in ignore_chars:
+            item['price'] = item['price'].replace(char,"").strip()
+        yield item
+
+    def parse_(self, response):
         products = response.css('.item')
         for product in products:
             item = Product()
