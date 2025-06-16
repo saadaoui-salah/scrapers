@@ -14,7 +14,7 @@ class Product(scrapy.Item):
 class SurugaYaSpider(scrapy.Spider):
     name = "suruga-ya"
     allowed_domains = ["suruga-ya.jp"]
-    sheet = fetch_sheet("1fG7O_euIj-PTXrsX59POEv1NEqG2CGpkv2p6skn4uDk", "suruga-ya")
+    sheet = fetch_sheet("1vR51PgCcuP3RuQStxw2QdYlBH5c5KImjgA5fBsggR7M", "surugaya")
 
     def start_requests(self):
         for row in self.sheet:
