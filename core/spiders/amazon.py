@@ -5,10 +5,10 @@ class AmazonSpider(scrapy.Spider):
     name = "amazon"
     ua = UserAgent()
     custom_settings = {
-        'CONCURRENT_REQUESTS': 100,
+        'CONCURRENT_REQUESTS': 10,
         'REFERER_ENABLED': False,
-        'COOKIES_ENABLED': False,
-        'DOWNLOAD_DELAY': 0,
+        'COOKIES_ENABLED': True,
+        'DOWNLOAD_DELAY': 0.2,
         'RETRY_TIMES': 5
     }
     visited_urls = []
