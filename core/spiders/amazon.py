@@ -55,7 +55,7 @@ class AmazonSpider(scrapy.Spider):
 
 
     def parse_categories(self, response):
-        slugs = response.xpath("//div[@id='departments']//span[contains(@class, 'a-text-bold')]/following::li[ancestor::div[@id='departments']]/span[@class='a-list-item']/a[contains(@class, 'a-link-normal') and contains(@class, 's-navigation-item')]").getall()
+        slugs = response.xpath("//div[@id='departments']//span[contains(@class, 'a-text-bold')]/following::li[ancestor::div[@id='departments']]/span[@class='a-list-item']/a[contains(@class, 'a-link-normal') and contains(@class, 's-navigation-item')]/@href").getall()
         if len(slugs):
             for slug in slugs:
                 yield scrapy.Request(
