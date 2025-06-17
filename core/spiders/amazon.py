@@ -8,7 +8,7 @@ class AmazonSpider(scrapy.Spider):
         'CONCURRENT_REQUESTS': 10,
         'REFERER_ENABLED': False,
         'COOKIES_ENABLED': True,
-        'DOWNLOAD_DELAY': 0.2,
+        'DOWNLOAD_DELAY': 1.5,
         'RETRY_TIMES': 5
     }
     visited_urls = []
@@ -18,11 +18,10 @@ class AmazonSpider(scrapy.Spider):
         "lc-acbnl": "en_GB",
         "ubid-acbnl": "258-1726622-9781405",
         "session-id-time": "2082787201l",
-        "csm-hit": "tb:F90AHJVXAS77SWAQXX8C+s-F90AHJVXAS77SWAQXX8C|1750127422666&t:1750127422666&adb:adblk_no",
-        "session-token": "fkk7GkNpc9Ww5gQJ8XREHhXgRXVXwJ0dyitjCHTGL4fLwaEATVlO7FP1NRMflXhJPDizOig7dDZnkGHtMaytk3KyYHM0SDCdM1YL0+t6g7XGuBk2s8IqZSgwUQOp2IcbR0CcSfZbRFClGfIZecDhHhE2f456xmChROqPBshvRD7jSYa5LG6XxYk09ocC62OeCJZ5tsUv3lIge1RWdj3Gqb30V3MrRcVxVjuy5+vyzfbomS6NdZpUT/462l2+dp2L1tgBMVXQLgHYUSoLKnZPQ+jT41ZcXpzXlQAKm905Oed7dnRAo8GGyUl+wY8irXWaV/sX4nDhapf1Q2YqMiYFZXAT5tYs1LTr",
-        "rxc": "AMs1bWEhIT5sSB92WWQ"
+        "csm-hit": "tb:VFFGVB6HV45FFVRX9Q3E+s-K6XHQGEG6JTDQ3T58X1E|1750144367041&t:1750144367041&adb:adblk_no",
+        "session-token": "UorW9Rq1i8qUj1M50ilXwFI0+0ZEdXIK3moHwUJ0ltSoS3eBMO7Nnu8eNLNRhrJ7otUsAGMSjyPlgM6n0eK34Q77gmpuUqnjUqpShQMeWqX0CRYROrfuIojOZbqZdvxKs6p9/M1dfF9URp+yQ0I0znACRtKg/c3sOTdO39uE3Zd7JmRA+qe+acbBwGRJFd48oOXwQs6crp0tQ3MYYXSWnPSg/QqJrK0Wyqq9Dw0EcDciR0GY4WP0Q/a0D/a395vCGt0bYR549mG8vWRpsZ3jxmBDaKG+fQM6QcQaPh42ptudRzjxwM3aCu8O5HEIURQ5IFyg+mgfnXcaz7lPRlck9F4LW9ZB9c2X",
+        "rxc": "AMs1bWEk6j9sSB92IGQ"
     }
-    proxy = 'burp'
 
 
     @property
@@ -52,15 +51,8 @@ class AmazonSpider(scrapy.Spider):
             cookies=self.cookies,
             callback=self.parse_categories,
             headers=self.headers,
-            errback=self.errback
         )
 
-    def errback(self, failure):
-        req  = failure.request
-        retry = failure.request.meta.get('retry', 0) +1
-        if retry < 15:
-            meta = {'retry': retry}
-            yield req.replace(meta=meta, headers=self.headers)
 
     def parse_categories(self, response):
         slugs = response.css('#departments .a-link-normal.s-navigation-item::attr(href)').getall()
