@@ -55,11 +55,9 @@ class AmazonSpider(scrapy.Spider):
 
 
     def parse_categories(self, response):
-        slugs = response.css('#departments .a-link-normal.s-navigation-item::attr(href)').getall()
-        slugs = list(filter(lambda x: x not in self.visited_urls and 's?i=electronics' in x, slugs))
+        slugs = response.xpath("//div[@id='departments']//span[contains(@class, 'a-text-bold')]/following::li[ancestor::div[@id='departments']]/span[@class='a-list-item']/a[contains(@class, 'a-link-normal') and contains(@class, 's-navigation-item')]").getall()
         if len(slugs):
             for slug in slugs:
-                self.visited_urls += [slug]
                 yield scrapy.Request(
                     url=f"https://www.amazon.nl{slug}",
                     callback=self.parse_categories,
