@@ -1,8 +1,9 @@
 import scrapy
-
+from fake_useragent import UserAgent
 
 class AmazonSpider(scrapy.Spider):
     name = "amazon"
+    ua = UserAgent()
     custom_settings = {
         'CONCURRENT_REQUESTS': 1,
         'REFERER_ENABLED': False,
@@ -10,24 +11,6 @@ class AmazonSpider(scrapy.Spider):
         'DOWNLOAD_DELAY': 0.3
     }
     visited_urls = []
-    headers = {
-        "accept": "*/*",
-        "accept-encoding": "gzip, deflate, br, zstd",
-        "accept-language": "fr-FR,fr;q=0.9,ar-DZ;q=0.8,ar;q=0.7,en-US;q=0.6,en;q=0.5",
-        "cache-control": "no-cache",
-        "dnt": "1",
-        "pragma": "no-caclshe",
-        "priority": "u=0, i",
-        "sec-ch-ua": "\"Google Chrome\";v=\"134\", \"Not=A?Brand\";v=\"8\", \"Chromium\";v=\"134\"",
-        "sec-ch-ua-mobile": "?0",
-        "sec-ch-ua-platform": "\"Linux\"",
-        "sec-fetch-dest": "document",
-        "sec-fetch-mode": "navigate",
-        "sec-fetch-site": "same-origin",
-        "sec-fetch-user": "?1",
-        "upgrade-insecure-requests": "1",
-        "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"
-    }
     cookies = {
         "session-id": "258-0309807-8035564",
         "i18n-prefs": "EUR",
@@ -38,6 +21,27 @@ class AmazonSpider(scrapy.Spider):
         "session-token": "wXz1kg03d6u9JCx9Dcai+VVkie9t9nx7Ci0g+CDnoWh87sj2ycdJCJYCgqJ7zxr5LIk+1ciCs3d/mQ93rIC6yBBU5WhQrp35+UumYd/soVTtYHaFRpPi1/h9Bp3FI97dm5UyZLHH0VkMihFXErWMU9QeD9fOJEXpO1BGOD5H8hXL20nXTgF4U2dCOM2/kE6MtUKlTDule2+EEFaxsstr0/Zr24flpW5UnsWyCEBKwxDOmZ40zTlZ1DgRmYksjkOvtoAEf78VcwHoodBACyEkbZTnbVwFYVzT/ozcuZw0cwReWrIgeAHVHY5NbFPOvamFyA0di8cydrflnOtZwdRgcw4Fv2/XS2t+",
         "rxc": "AMs1bWHyRD5sSB92o2U"
     }
+
+    @property
+    def headers(self):
+        headers = {
+            "accept": "*/*",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "fr-FR,fr;q=0.9,ar-DZ;q=0.8,ar;q=0.7,en-US;q=0.6,en;q=0.5",
+            "cache-control": "no-cache",
+            "dnt": "1",
+            "pragma": "no-caclshe",
+            "priority": "u=0, i",
+            "sec-ch-ua": "\"Google Chrome\";v=\"134\", \"Not=A?Brand\";v=\"8\", \"Chromium\";v=\"134\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Linux\"",
+            "sec-fetch-dest": "document",
+            "sec-fetch-mode": "navigate",
+            "sec-fetch-site": "same-origin",
+            "sec-fetch-user": "?1",
+            "upgrade-insecure-requests": "1",
+            "user-agent": self.ua.random
+        }
 
 
     def start_requests(self):
@@ -78,7 +82,7 @@ class AmazonSpider(scrapy.Spider):
 
     def parse_pdp(self, response):
         yield {
-            'name': response.css('#productTitle::text').get(),
+            'name': response.css('#productTitle::text').get().strip(),
             'price': response.css('#corePrice_feature_div .a-price .a-offscreen::text').get('').replace('€', ''),
             'url': response.url,
             'dispatch': response.css('[data-csa-c-content-id="fulfillerInfoFeature"] .offer-display-feature-text-message::text').get('').lower(),
