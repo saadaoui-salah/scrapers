@@ -5,11 +5,11 @@ class AmazonSpider(scrapy.Spider):
     name = "amazon"
     ua = UserAgent()
     custom_settings = {
-        'CONCURRENT_REQUESTS': 10,
+        'CONCURRENT_REQUESTS': 100,
         'REFERER_ENABLED': False,
-        'COOKIES_ENABLED': True,
-        'DOWNLOAD_DELAY': 0.4,
-        'RETRY_TIMES': 5
+        'COOKIES_ENABLED': False,
+        'DOWNLOAD_DELAY': 0,
+        'RETRY_TIMES': 15
     }
     visited_urls = []
     cookies = {
@@ -18,9 +18,9 @@ class AmazonSpider(scrapy.Spider):
         "lc-acbnl": "en_GB",
         "ubid-acbnl": "258-1726622-9781405",
         "session-id-time": "2082787201l",
-        "csm-hit": "tb:VFFGVB6HV45FFVRX9Q3E+s-K6XHQGEG6JTDQ3T58X1E|1750144367041&t:1750144367041&adb:adblk_no",
-        "session-token": "UorW9Rq1i8qUj1M50ilXwFI0+0ZEdXIK3moHwUJ0ltSoS3eBMO7Nnu8eNLNRhrJ7otUsAGMSjyPlgM6n0eK34Q77gmpuUqnjUqpShQMeWqX0CRYROrfuIojOZbqZdvxKs6p9/M1dfF9URp+yQ0I0znACRtKg/c3sOTdO39uE3Zd7JmRA+qe+acbBwGRJFd48oOXwQs6crp0tQ3MYYXSWnPSg/QqJrK0Wyqq9Dw0EcDciR0GY4WP0Q/a0D/a395vCGt0bYR549mG8vWRpsZ3jxmBDaKG+fQM6QcQaPh42ptudRzjxwM3aCu8O5HEIURQ5IFyg+mgfnXcaz7lPRlck9F4LW9ZB9c2X",
-        "rxc": "AMs1bWEk6j9sSB92IGQ"
+        "csm-hit": "tb:TKVD9Q9RCVM97B2YJS37|1750150600002&t:1750150602087&adb:adblk_no",
+        "session-token": "A6dj3DMO2uxkcj21odJ4k6zis1068sJqyZ+OGAEjBjmC3V4FWIxahU/WL4cfRL4eP6Zwug7FlW/9YLeB/s4s7slZdNqcadKPtUtXv5pn+aordCEp8q+tcZQjQKNtzWl33Dc0G0BrqU3KQjX5KZ4fiUYM0ZTmAFRZc3o7+vFvCVYvO4gjk3n5Mha/471oNRfX1EYL8VRLblMHgxA/ALi3lTlNi/kT1KF5CPl99d3ZvqMUwxrvMj+Fa0TJxKVOMe224nIuDzGUWRH6bSvOE+vGmRhG+/OlkyJaib4Ovn8HrjZHdFuIyXlYfDaR6XqRJcZjoMPaWl4iqtsm8D4dY2SDwESLs/x1rtF/",
+        "rxc": "AMs1bWGM3z9sSB92DmQ"
     }
     proxy = 'oxy_isp'
 
@@ -49,7 +49,6 @@ class AmazonSpider(scrapy.Spider):
     def start_requests(self):
         yield scrapy.Request(
             url="https://www.amazon.nl/s?i=electronics&rh=n%3A16269066031&s=popularity-rank&fs=true&language=en&qid=1750115631&rnid=16365235031&xpid=VCVepzxZn09dG&ref=sr_nr_p_36_0_0&low-price=41&high-price=",
-            cookies=self.cookies,
             callback=self.parse_categories,
             headers=self.headers,
         )
@@ -63,7 +62,6 @@ class AmazonSpider(scrapy.Spider):
                 self.visited_urls += [slug]
                 yield scrapy.Request(
                     url=f"https://www.amazon.nl{slug}",
-                    cookies=self.cookies,
                     callback=self.parse_categories,
                     headers=self.headers
                 )

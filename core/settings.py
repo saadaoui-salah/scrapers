@@ -21,8 +21,10 @@ DOWNLOADER_MIDDLEWARES = {
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = "core (+http://www.yourdomain.com)"
 
-RETRY_HTTP_CODES = [500, 502, 503, 504, 522, 524, 408, 429, 403]
-
+RETRY_HTTP_CODES = [500, 502, 504, 522, 524, 408, 429, 403]
+# Enable caching
+HTTPCACHE_ENABLED = True
+HTTPCACHE_IGNORE_HTTP_CODES = [301, 302, 303, 307, 308, 400, 401, 402, 403, 404, 405, 500, 501, 502, 503, 504]
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
 RETRY_TIMES = 15
