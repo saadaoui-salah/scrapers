@@ -42,6 +42,7 @@ class AmazonSpider(scrapy.Spider):
             "upgrade-insecure-requests": "1",
             "user-agent": self.ua.random
         }
+        return headers
 
 
     def start_requests(self):
