@@ -8,7 +8,7 @@ class AmazonSpider(scrapy.Spider):
         'CONCURRENT_REQUESTS': 10,
         'REFERER_ENABLED': False,
         'COOKIES_ENABLED': True,
-        'DOWNLOAD_DELAY': 1.5,
+        'DOWNLOAD_DELAY': 0.4,
         'RETRY_TIMES': 5
     }
     visited_urls = []
