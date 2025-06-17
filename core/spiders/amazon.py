@@ -22,6 +22,7 @@ class AmazonSpider(scrapy.Spider):
         "session-token": "UorW9Rq1i8qUj1M50ilXwFI0+0ZEdXIK3moHwUJ0ltSoS3eBMO7Nnu8eNLNRhrJ7otUsAGMSjyPlgM6n0eK34Q77gmpuUqnjUqpShQMeWqX0CRYROrfuIojOZbqZdvxKs6p9/M1dfF9URp+yQ0I0znACRtKg/c3sOTdO39uE3Zd7JmRA+qe+acbBwGRJFd48oOXwQs6crp0tQ3MYYXSWnPSg/QqJrK0Wyqq9Dw0EcDciR0GY4WP0Q/a0D/a395vCGt0bYR549mG8vWRpsZ3jxmBDaKG+fQM6QcQaPh42ptudRzjxwM3aCu8O5HEIURQ5IFyg+mgfnXcaz7lPRlck9F4LW9ZB9c2X",
         "rxc": "AMs1bWEk6j9sSB92IGQ"
     }
+    proxy = 'oxy_isp'
 
 
     @property
