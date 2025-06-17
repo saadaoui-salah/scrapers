@@ -56,7 +56,7 @@ class AmazonSpider(scrapy.Spider):
 
     def parse_categories(self, response):
         slugs = response.css('#departments .a-link-normal.s-navigation-item::attr(href)').getall()
-        slugs = list(filter(lambda x: x not in self.visited_urls, slugs))
+        slugs = list(filter(lambda x: x not in self.visited_urls and 's?i=electronics' in x, slugs))
         if len(slugs):
             for slug in slugs:
                 self.visited_urls += [slug]
