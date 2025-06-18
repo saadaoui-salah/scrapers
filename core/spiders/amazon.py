@@ -5,10 +5,10 @@ class AmazonSpider(scrapy.Spider):
     name = "amazon"
     ua = UserAgent()
     custom_settings = {
-        'CONCURRENT_REQUESTS': 20,
-        'REFERER_ENABLED': False,
-        'COOKIES_ENABLED': True,
-        'DOWNLOAD_DELAY': 1.5,
+        'CONCURRENT_REQUESTS': 1,
+        'REFERER_ENABLED': True,
+        'COOKIES_ENABLED': False,
+        'DOWNLOAD_DELAY': 1,
         'RETRY_TIMES': 15
     }
     visited_urls = []
@@ -22,6 +22,7 @@ class AmazonSpider(scrapy.Spider):
         "session-token": "A6dj3DMO2uxkcj21odJ4k6zis1068sJqyZ+OGAEjBjmC3V4FWIxahU/WL4cfRL4eP6Zwug7FlW/9YLeB/s4s7slZdNqcadKPtUtXv5pn+aordCEp8q+tcZQjQKNtzWl33Dc0G0BrqU3KQjX5KZ4fiUYM0ZTmAFRZc3o7+vFvCVYvO4gjk3n5Mha/471oNRfX1EYL8VRLblMHgxA/ALi3lTlNi/kT1KF5CPl99d3ZvqMUwxrvMj+Fa0TJxKVOMe224nIuDzGUWRH6bSvOE+vGmRhG+/OlkyJaib4Ovn8HrjZHdFuIyXlYfDaR6XqRJcZjoMPaWl4iqtsm8D4dY2SDwESLs/x1rtF/",
         "rxc": "AMs1bWGM3z9sSB92DmQ"
     }
+    proxy = 'oxy_isp'
 
 
     @property
@@ -34,6 +35,7 @@ class AmazonSpider(scrapy.Spider):
             "dnt": "1",
             "pragma": "no-cache",
             "priority": "u=0, i",
+            "referer": "https://www.google.com",
             "sec-ch-ua": "\"Google Chrome\";v=\"130\", \"Not=A?Brand\";v=\"8\", \"Chromium\";v=\"130\"",
             "sec-ch-ua-mobile": "?0",
             "sec-ch-ua-platform": "\"Linux\"",
@@ -47,14 +49,13 @@ class AmazonSpider(scrapy.Spider):
 
     def start_requests(self):
         url="https://www.amazon.nl/s?i=electronics&rh=n%3A16269066031&s=popularity-rank&fs=true&language=en&qid=1750115631&rnid=16365235031&xpid=VCVepzxZn09dG&ref=sr_nr_p_36_0_0&low-price=41&high-price="
-        f = open('amazon.txt','r').read()
-        for url in f.split(','):
-
-            yield scrapy.Request(
-                url=url,
-                callback=self.parse_products,
-                headers=self.headers,
-            )
+        #f = open('amazon.txt','r').read()
+        #for url in f.split(','):
+        yield scrapy.Request(
+            url=url,
+            callback=self.parse_categories,
+            headers=self.headers,
+        )
 
 
     def parse_categories(self, response):
@@ -67,19 +68,22 @@ class AmazonSpider(scrapy.Spider):
                     headers=self.headers
                 )
         else:
+            print(len(slugs), response.url)
             if not len(response.css('[data-component-type="s-product-image"] a::attr(href)')):
                 print(response.url)
                 return
-            yield {'url': response.url}
-            #yield from self.parse_products(response)
+            #yield {'url': response.url}
+            yield from self.parse_products(response)
 
     def parse_products(self, response):
-        for product in response.css('[data-component-type="s-product-image"] a::attr(href)').getall():
+        for product in response.css('[role="listitem"]'):
+            slug = product.css('[data-component-type="s-product-image"] a::attr(href)').get()
             yield scrapy.Request(
-                url=f"https://www.amazon.nl{product}",
+                url=f"https://www.amazon.nl{slug}",
                 cookies=self.cookies,
                 callback=self.parse_pdp,
-                headers=self.headers
+                headers=self.headers,
+                meta={'price': product.css('[aria-describedby="price-link"] > .a-price .a-offscreen::text').get('').replace('€', '')}
             )
         if next_link := response.css('.s-pagination-next::attr(href)').get():
             yield scrapy.Request(
@@ -91,12 +95,15 @@ class AmazonSpider(scrapy.Spider):
 
 
     def parse_pdp(self, response):
+        if not response.css('#productTitle::text').get():
+            headers = self.headers.copy()
+            headers['referer'] = 'https://www.bing.com'
+            yield response.request.replace(headers=headers, dont_filter=True)
+            return
         yield {
             'name': response.css('#productTitle::text').get().strip(),
-            'price': response.css('#corePrice_feature_div .a-price .a-offscreen::text').get('').replace('€', ''),
+            'price': response.css('#corePrice_feature_div .a-price .a-offscreen::text').get('').replace('€', '') or response.meta['price'],
             'url': response.url,
             'dispatch': response.css('[data-csa-c-content-id="fulfillerInfoFeature"] .offer-display-feature-text-message::text').get('').lower(),
             'return': response.css('[data-csa-c-content-id="odf-desktop-return-info"] .offer-display-feature-text-message::text').get()
         }
-        if not response.css('#productTitle::text').get():
-            print(response.text)
