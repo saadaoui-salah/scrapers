@@ -70,7 +70,7 @@ class AmazonSpider(scrapy.Spider):
         else:
             print(len(slugs), response.url)
             if not len(response.css('[data-component-type="s-product-image"] a::attr(href)')):
-                print(response.url)
+                self.logger.error(f'NO PRODUCTS : {response.url}')
                 return
             #yield {'url': response.url}
             yield from self.parse_products(response)
@@ -98,7 +98,12 @@ class AmazonSpider(scrapy.Spider):
         if not response.css('#productTitle::text').get():
             headers = self.headers.copy()
             headers['referer'] = 'https://www.bing.com'
-            yield response.request.replace(headers=headers, dont_filter=True)
+            meta = response.meta.copy()
+            meta['retry'] = meta.get('retry', 0) +1 
+            if meta['retry'] > 15:
+                self.logger.error(f'GAVE UP retry : {response.url}')
+                return 
+            yield response.request.replace(headers=headers, dont_filter=True, meta=meta)
             return
         yield {
             'name': response.css('#productTitle::text').get().strip(),
