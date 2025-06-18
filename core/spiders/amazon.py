@@ -5,10 +5,10 @@ class AmazonSpider(scrapy.Spider):
     name = "amazon"
     ua = UserAgent()
     custom_settings = {
-        'CONCURRENT_REQUESTS': 100,
+        'CONCURRENT_REQUESTS': 20,
         'REFERER_ENABLED': False,
-        'COOKIES_ENABLED': False,
-        'DOWNLOAD_DELAY': 0,
+        'COOKIES_ENABLED': True,
+        'DOWNLOAD_DELAY': 1.5,
         'RETRY_TIMES': 15
     }
     visited_urls = []
@@ -22,7 +22,6 @@ class AmazonSpider(scrapy.Spider):
         "session-token": "A6dj3DMO2uxkcj21odJ4k6zis1068sJqyZ+OGAEjBjmC3V4FWIxahU/WL4cfRL4eP6Zwug7FlW/9YLeB/s4s7slZdNqcadKPtUtXv5pn+aordCEp8q+tcZQjQKNtzWl33Dc0G0BrqU3KQjX5KZ4fiUYM0ZTmAFRZc3o7+vFvCVYvO4gjk3n5Mha/471oNRfX1EYL8VRLblMHgxA/ALi3lTlNi/kT1KF5CPl99d3ZvqMUwxrvMj+Fa0TJxKVOMe224nIuDzGUWRH6bSvOE+vGmRhG+/OlkyJaib4Ovn8HrjZHdFuIyXlYfDaR6XqRJcZjoMPaWl4iqtsm8D4dY2SDwESLs/x1rtF/",
         "rxc": "AMs1bWGM3z9sSB92DmQ"
     }
-    proxy = 'oxy_isp'
 
 
     @property
@@ -35,23 +34,27 @@ class AmazonSpider(scrapy.Spider):
             "dnt": "1",
             "pragma": "no-cache",
             "priority": "u=0, i",
-            "sec-ch-ua": "\"Google Chrome\";v=\"134\", \"Not=A?Brand\";v=\"8\", \"Chromium\";v=\"134\"",
+            "sec-ch-ua": "\"Google Chrome\";v=\"130\", \"Not=A?Brand\";v=\"8\", \"Chromium\";v=\"130\"",
             "sec-ch-ua-mobile": "?0",
             "sec-ch-ua-platform": "\"Linux\"",
             "sec-fetch-dest": "document",
             "sec-fetch-mode": "navigate",
             "sec-fetch-site": "same-origin",
             "sec-fetch-user": "?1",
-            "user-agent": 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'
+            "user-agent": 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36'
         }
         return headers
 
     def start_requests(self):
-        yield scrapy.Request(
-            url="https://www.amazon.nl/s?i=electronics&rh=n%3A16269066031&s=popularity-rank&fs=true&language=en&qid=1750115631&rnid=16365235031&xpid=VCVepzxZn09dG&ref=sr_nr_p_36_0_0&low-price=41&high-price=",
-            callback=self.parse_categories,
-            headers=self.headers,
-        )
+        url="https://www.amazon.nl/s?i=electronics&rh=n%3A16269066031&s=popularity-rank&fs=true&language=en&qid=1750115631&rnid=16365235031&xpid=VCVepzxZn09dG&ref=sr_nr_p_36_0_0&low-price=41&high-price="
+        f = open('amazon.txt','r').read()
+        for url in f.split(','):
+
+            yield scrapy.Request(
+                url=url,
+                callback=self.parse_products,
+                headers=self.headers,
+            )
 
 
     def parse_categories(self, response):
