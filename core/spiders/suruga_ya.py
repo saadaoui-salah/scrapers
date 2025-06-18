@@ -13,7 +13,9 @@ class Product(scrapy.Item):
 
 class SurugaYaSpider(scrapy.Spider):
     name = "suruga-ya"
-    allowed_domains = ["suruga-ya.jp"]
+    custom_settings = {
+        'DOWNLOAD_DELAY': 0.3 
+    }
     sheet = fetch_sheet("1vR51PgCcuP3RuQStxw2QdYlBH5c5KImjgA5fBsggR7M", "surugaya")
 
     def start_requests(self):
