@@ -5,7 +5,8 @@ from core.utils.utils import read_json
 class EbaySpider(scrapy.Spider):
     custom_settings = {
         'CONCURRENT_REQUESTS': 1,
-        'COOKIES_ENABLED':False
+        'COOKIES_ENABLED':False,
+        'HTTPCACHE_ENABLED': False
     }
     name = "ebay"
     start_urls = [f"https://www.ebay.co.uk/str/automationplanetuk?_ipg=200&_pgn={i}&_tab=shop&_ajax=itemFilter&_tabName=shop" for i in [49]]
@@ -17,6 +18,7 @@ class EbaySpider(scrapy.Spider):
         "dnt": "1",
         "pragma": "no-cache",
         "priority": "u=0, i",
+        "referer":"https://www.google.com",
         "sec-ch-ua": "\"Google Chrome\";v=\"134\", \"Not=A?Brand\";v=\"8\", \"Chromium\";v=\"134\"",
         "sec-ch-ua-mobile": "?0",
         "sec-ch-ua-platform": "\"Linux\"",
@@ -39,7 +41,7 @@ class EbaySpider(scrapy.Spider):
                     dont_filter=True,
                     callback=self.parse_pdp,
                     headers=self.headers,
-                    meta={'item': url}
+                    meta={'item': url,}
             ) 
 
     def parse(self, response):
