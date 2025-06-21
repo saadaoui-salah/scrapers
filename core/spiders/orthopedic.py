@@ -7,7 +7,6 @@ class OrthopedicSpider(scrapy.Spider):
 
     def parse(self, response):
         for city in response.css('.col-md-3 .mynav a'):
-            print(city.css('::text').get())
             yield scrapy.Request(
                 url=f"https:{city.css('::attr(href)').get()}",
                 callback=self.parse_doctors,
