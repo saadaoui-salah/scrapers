@@ -13,10 +13,13 @@ class Product(scrapy.Item):
 
 class SurugaYaSpider(scrapy.Spider):
     name = "suruga-ya"
-    custom_settings = {
-        'DOWNLOAD_DELAY': 0.3 
-    }
     sheet = fetch_sheet("1vR51PgCcuP3RuQStxw2QdYlBH5c5KImjgA5fBsggR7M", "surugaya")
+    custom_settings = {
+        'ITEM_PIPELINES': {
+            'core.pipelines.google_sheets.GoogleSheetsPipeline': 300,
+        }
+    }
+    sheet_id = '1ZONuwTx2U10HvAcVLGYdij5Y-qWm1bxzr9d_1wOj2uY'
 
     def start_requests(self):
         for row in self.sheet:

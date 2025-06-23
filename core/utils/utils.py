@@ -126,6 +126,23 @@ def fetch_sheet(sheet_id: str, sheet_name: str):
 
     return rows
 
+def csv_to_sheet(spreadsheet_id,sheet_name, filename):
+    df = pd.read_csv(filename)
+    scope = [
+        "https://spreadsheets.google.com/feeds",
+        "https://www.googleapis.com/auth/drive"
+    ]
+    creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
+    client = gspread.authorize(creds)
+
+    spreadsheet = client.open_by_key(spreadsheet_id)
+
+    rows, cols = df.shape
+    worksheet = spreadsheet.add_worksheet(title=sheet_name, rows=str(rows + 1), cols=str(cols))
+
+    # Upload CSV data (headers + rows)
+    worksheet.update([df.columns.tolist()] + df.values.tolist())
+
 def csv_to_dict(data: Union[str, pd.DataFrame]) -> list[dict]:
     """
     Convert a CSV file or pandas DataFrame to a list of dictionaries.

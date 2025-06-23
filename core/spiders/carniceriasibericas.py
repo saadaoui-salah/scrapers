@@ -4,6 +4,9 @@ from core.utils.cleaning import clean
 class CarniceriasibericasSpider(scrapy.Spider):
     name = "carniceriasibericas"
     start_urls = ["https://carniceriasibericas.com/todas-las-carnicerias/"]
+    custom_settings = {
+        'DOWNLOAD_DELAY': 0.3 
+    }
 
     def parse(self, response):
         for cat in response.css('[data-fid="12873"] .wpc-filters-ul-list > li'):
