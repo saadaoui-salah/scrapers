@@ -5,7 +5,8 @@ class CarniceriasibericasSpider(scrapy.Spider):
     name = "carniceriasibericas"
     start_urls = ["https://carniceriasibericas.com/todas-las-carnicerias/"]
     custom_settings = {
-        'DOWNLOAD_DELAY': 0.3 
+        'DOWNLOAD_DELAY': 0.3,
+        'HTTPCACHE_ENABLED':True
     }
 
     def parse(self, response):
@@ -18,7 +19,7 @@ class CarniceriasibericasSpider(scrapy.Spider):
                                 url=last_lev.css('a::attr(href)').get(),
                                 callback=self.parse_products,
                                 meta={
-                                    'pro':sub_cat.css('.wpc-term-item-content-wrapper a::text').get(),
+                                    'pro':sub_cat.css('a::text').get(),
                                     'mun':last_lev.css('.wpc-term-item-content-wrapper a::text').get(),
                                 }
                             )
@@ -29,10 +30,11 @@ class CarniceriasibericasSpider(scrapy.Spider):
 
     def parse_products(self, response):
         for product in response.css('.item-container'):
+            address = clean(product.xpath(".//strong[contains(text(), 'Dirección')]/../text()[2]").get(''))
             yield {
                 'RAZÓN SOCIAL':product.css('.card-title h3::text').get(),
-                'DIRECCIÓN':clean(product.xpath(".//strong[contains(text(), 'Dirección')]/../text()[2]").get('')),
-                'PROVINCIA ':response.meta['pro'],
+                'DIRECCIÓN':address,
+                'PROVINCIA ':address.split(',')[-1],
                 'MUNICIPIO':response.meta['mun'],
                 'CODIGO POSTAL':clean(product.xpath(".//strong[contains(text(), 'Código postal')]/../text()[2]").get('')),
                 'TELEFONO':product.xpath('.//a[contains(@href,"tel:")]/@href').get('').replace('tel:',''),
