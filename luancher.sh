@@ -7,4 +7,5 @@ source ~/scrappers/env/bin/activate
 cd ~/scrappers
 
 # Run the spider
-scrapy crawl suruga-ya
+echo '' > suruga-ya.log
+scrapy crawl suruga-ya --logfile suruga-ya.log
