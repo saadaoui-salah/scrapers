@@ -5,8 +5,8 @@ class CarniceriasibericasSpider(scrapy.Spider):
     name = "carniceriasibericas"
     start_urls = ["https://carniceriasibericas.com/todas-las-carnicerias/"]
     custom_settings = {
-        'DOWNLOAD_DELAY': 0.3,
-        'HTTPCACHE_ENABLED':True
+        'DOWNLOAD_DELAY': 0.1,
+        'HTTPCACHE_ENABLED':False
     }
 
     def parse(self, response):
