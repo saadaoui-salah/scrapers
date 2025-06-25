@@ -5,7 +5,7 @@ class CarniceriasibericasSpider(scrapy.Spider):
     name = "carniceriasibericas"
     start_urls = ["https://carniceriasibericas.com/todas-las-carnicerias/"]
     custom_settings = {
-        'DOWNLOAD_DELAY': 0.1,
+        'DOWNLOAD_DELAY': 1.3,
         'HTTPCACHE_ENABLED':False
     }
 
