@@ -1,11 +1,15 @@
 import scrapy
 from w3lib.html import remove_tags
 import re
-from core.utils.utils import read_csv
-from core.spiders.hipages import headers
 
-class LeilaoimovelSpider(scrapy.Spider):
-    name = "leilaoimovel"
+def read_csv(path):
+    import pandas as pd
+    df = pd.read_csv(path)
+    df = df.where(pd.notnull(df), None)
+    return df
+
+class CaixaSpider(scrapy.Spider):
+    name = "caixa"
     start_urls = ["https://venda-imoveis.caixa.gov.br/listaweb/Lista_imoveis_geral.csv"]
     url = "https://venda-imoveis.caixa.gov.br/sistema/carregaPesquisaImoveis.asp"
     headers = {
@@ -27,7 +31,6 @@ class LeilaoimovelSpider(scrapy.Spider):
         "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
         "x-requested-with": "XMLHttpRequest"
     }
-    proxy = 'burp'
 
     def start_requests(self):
         headers = self.headers.copy()

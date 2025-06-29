@@ -14,21 +14,35 @@ class Product(scrapy.Item):
 class SurugaYaSpider(scrapy.Spider):
     name = "suruga-ya"
     sheet = fetch_sheet("1vR51PgCcuP3RuQStxw2QdYlBH5c5KImjgA5fBsggR7M", "surugaya")
-    custom_settings = {
-        'ITEM_PIPELINES': {
-            'core.pipelines.google_sheets.GoogleSheetsPipeline': 300,
-        }
-    }
+    #custom_settings = {
+    #    'ITEM_PIPELINES': {
+    #        'core.pipelines.google_sheets.GoogleSheetsPipeline': 300,
+    #    }
+    #}
     sheet_id = '1ZONuwTx2U10HvAcVLGYdij5Y-qWm1bxzr9d_1wOj2uY'
-
+    keywords = [
+        "https://www.suruga-ya.jp/search?category=50103&search_word=&brand=%E3%83%90%E3%83%B3%E3%83%80%E3%82%A4",
+        "https://www.suruga-ya.jp/search?category=50103&search_word=&brand=%E3%82%BF%E3%82%AB%E3%83%A9%E3%83%88%E3%83%9F%E3%83%BC%E3%82%A2%E3%83%BC%E3%83%84",
+        "https://www.suruga-ya.jp/search?category=50103&search_word=&brand=%E3%83%AA%E3%83%BC%E3%83%A1%E3%83%B3%E3%83%88",
+        "https://www.suruga-ya.jp/search?category=50103&search_word=&brand=POPMART",
+        "https://www.suruga-ya.jp/search?category=50103&search_word=&brand=%E3%83%A1%E3%82%AC%E3%83%8F%E3%82%A6%E3%82%B9",
+        "https://www.suruga-ya.jp/search?category=50103&search_word=&brand=%E3%83%90%E3%83%B3%E3%83%97%E3%83%AC%E3%82%B9%E3%83%88",
+        "https://www.suruga-ya.jp/search?category=50103&search_word=&brand=%E3%83%A6%E3%83%BC%E3%82%B8%E3%83%B3"]
+    
     def start_requests(self):
-        for row in self.sheet:
+        if not self.keywords:
+            for row in self.sheet:
+                yield scrapy.Request(
+                    url=row['url'],
+                    callback=self.parse_price,
+                    meta={'item': row}
+                )
+        for url in self.keywords:
             yield scrapy.Request(
-                url=row['url'],
-                callback=self.parse_price,
-                meta={'item': row}
+                url=url,
+                callback=self.parse,
             )
-        
+    
     def parse_price(self, response):
         item = response.meta['item']
         item['price'] = remove_tags(response.xpath('//div[@id="tabs-all"]//tr[@class="item"][4]/td[1]//strong[contains(@class,"text-red text-bold mgnL10")]/text()').get("xxx"))
@@ -37,7 +51,7 @@ class SurugaYaSpider(scrapy.Spider):
             item['price'] = item['price'].replace(char,"").strip()
         yield item
 
-    def parse_(self, response):
+    def parse(self, response):
         products = response.css('.item')
         for product in products:
             item = Product()
@@ -59,6 +73,7 @@ class SurugaYaSpider(scrapy.Spider):
                 url=next_link,
                 callback=self.parse,
             )
+
     def get_bigger_image(self, image):
         if not image:
             return ''
