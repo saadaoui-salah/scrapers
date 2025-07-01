@@ -6,6 +6,7 @@ html/
 *.log
 *.csv
 *.json
+*.html
 *.env
 .env
 .scrapy

@@ -14,11 +14,11 @@ class Product(scrapy.Item):
 class SurugaYaSpider(scrapy.Spider):
     name = "suruga-ya"
     sheet = fetch_sheet("1vR51PgCcuP3RuQStxw2QdYlBH5c5KImjgA5fBsggR7M", "surugaya")
-    #custom_settings = {
-    #    'ITEM_PIPELINES': {
-    #        'core.pipelines.google_sheets.GoogleSheetsPipeline': 300,
-    #    }
-    #}
+    custom_settings = {
+        'ITEM_PIPELINES': {
+            'core.pipelines.google_sheets.GoogleSheetsPipeline': 300,
+        }
+    }
     sheet_id = '1ZONuwTx2U10HvAcVLGYdij5Y-qWm1bxzr9d_1wOj2uY'
     keywords = [
         "https://www.suruga-ya.jp/search?category=50103&search_word=&brand=%E3%83%90%E3%83%B3%E3%83%80%E3%82%A4",
@@ -30,18 +30,17 @@ class SurugaYaSpider(scrapy.Spider):
         "https://www.suruga-ya.jp/search?category=50103&search_word=&brand=%E3%83%A6%E3%83%BC%E3%82%B8%E3%83%B3"]
     
     def start_requests(self):
-        if not self.keywords:
-            for row in self.sheet:
-                yield scrapy.Request(
-                    url=row['url'],
-                    callback=self.parse_price,
-                    meta={'item': row}
-                )
-        for url in self.keywords:
+        for row in self.sheet:
             yield scrapy.Request(
-                url=url,
-                callback=self.parse,
+                url=row['url'],
+                callback=self.parse_price,
+                meta={'item': row}
             )
+        #for url in self.keywords:
+        #    yield scrapy.Request(
+        #        url=url,
+        #        callback=self.parse,
+        #    )
     
     def parse_price(self, response):
         item = response.meta['item']
