@@ -74,7 +74,7 @@ def read_glob_files(pattern):
     for file in files:
         with open(file, 'r') as f:
             sel = scrapy.Selector(text=f.read())
-            yield sel
+            yield (sel, file)
 
 def fake_request(callback, meta=None):
     from scrapy import Request

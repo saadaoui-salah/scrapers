@@ -2,7 +2,7 @@ import scrapy
 from urllib.parse import urlencode
 from furl import furl
 PARAMS = [
-    ['dental-services', 'surgeons'],
+    ['310080006', 'pharmacy'],
 ]
 
 
@@ -35,8 +35,7 @@ class HealthdirectSpider(scrapy.Spider):
             for location in response.json()['data']['suburbs']:
                 l = f"{location['label'].replace(' ', '-')}-{location['code']}-{location['state']['label']}"
                 yield scrapy.Request(
-                    url="https://www.healthdirect.gov.au/australian-health-services/"\
-                    f"_next/data/dMOy4AP9PxQTod-WnsbP9/ar/search/{l}/{param[1]}.json?serviceName={param[1]}&offset=0&isMapView=false&params={l}&params={param[1]}",
+                    url=f"https://www.healthdirect.gov.au/australian-health-services/_next/data/ndf8NjWm2EehBnrL3Jum_/ar/search/{l.lower()}/{param[1]}/{param[0]}.json?offset=0&params={l.lower()}&params={param[1]}&params={param[0]}",
                     callback=self.parse_results
                 )
 

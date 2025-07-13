@@ -1,10 +1,11 @@
 import scrapy
 import json
 import base64 
+import os
 
 class DoordashSpider(scrapy.Spider):
     name = "doordash"
-    api_key = '99c3e72ebed74229beb6787c56c599cc'
+    api_key = os.getenv('ZYTE_API')
     auth_str = f"{api_key}:".encode()
     auth_header = base64.b64encode(auth_str).decode()
     headers = {
