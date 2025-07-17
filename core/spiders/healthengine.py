@@ -77,13 +77,13 @@ class HealthengineSpider(scrapy.Spider):
         "IR_29590": "1747770500505|0|1747770500505||",
         "he_ga_ZVK7K6FDJP": "GS2.1.s1747769191$o1$g1$t1747770502$j55$l0$h0$d3LJF2-O4_9j0j-2GsulQ31s5e-yaYZcv2w"
     }
-    proxy='burp'
+    proxy='oxy_isp'
 
 
     def start_requests(self):
-        for page in range(13):
+        for page in range(49):
             yield scrapy.Request(
-                url=f"https://healthengine.com.au/search?page={page}&q=Surgery&onlineAppts=true",
+                url=f"https://healthengine.com.au/search?page={page}&q=pharmacist&onlineAppts=true",
                 callback=self.parse,
                 cookies=self.cookies,
                 headers=self.headers
