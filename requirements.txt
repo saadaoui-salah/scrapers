@@ -81,7 +81,7 @@ typing_extensions==4.12.2
 tzdata==2024.2
 undetected-chromedriver==3.5.5
 uritemplate==4.1.1
-urllib3==2.2.2
+urllib3==2.5.0
 w3lib==2.2.1
 websocket-client==1.8.0
 websockets==14.2
