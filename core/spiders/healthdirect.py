@@ -2,12 +2,13 @@ import scrapy
 from urllib.parse import urlencode
 from furl import furl
 PARAMS = [
-    ['310080006', 'pharmacy'],
+    ['310125001', 'radiology-service'],
 ]
 
 
 class HealthdirectSpider(scrapy.Spider):
     name = "healthdirect"
+    proxy = 'oxy_isp'
 
     def start_requests(self):
         import string
