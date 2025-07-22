@@ -8,8 +8,9 @@ PARAMS = [
 
 class HealthdirectSpider(scrapy.Spider):
     name = "healthdirect"
-    proxy = 'oxy_isp'
-
+    custom_settings = {
+        'HTTPCACHE_ENABLED': True
+    }
     def start_requests(self):
         import string
         alphabet = list(string.ascii_lowercase)
