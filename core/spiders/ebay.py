@@ -5,7 +5,8 @@ from core.proxy.zyte_api import ZyteRequest, load
 
 class EbaySpider(scrapy.Spider):
     custom_settings = {
-        'CONCURRENT_REQUESTS': 1,
+        'CONCURRENT_REQUESTS': 40,
+        'DOWNLOAD_DELAY':0.3,
         'COOKIES_ENABLED':False,
         'HTTPCACHE_ENABLED': False
     }
