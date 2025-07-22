@@ -1,7 +1,7 @@
 import os
 import base64
 import json
-from scrapy import Request
+from scrapy import Request, Selector
 
 class ZyteRequest(Request):
     def __init__(self, url, *args, http_response_body=True, **kwargs):
@@ -30,7 +30,18 @@ class ZyteRequest(Request):
             method="POST",
             headers=headers,
             body=json.dumps(payload),
+            meta={'url': url},
             dont_filter=True,  # Avoid duplicate filtering since it's proxied
             *args,
             **kwargs
         )
+
+
+def load(response):
+    response = base64.b64decode(response.json()['httpResponseBody'])
+    try:
+        response = json.loads(response)
+    except Exception:
+        response = Selector(text=response)
+        
+    return response

@@ -1,6 +1,7 @@
 import scrapy
 from w3lib.html import remove_tags
-from core.utils.utils import read_json
+#from core.utils.utils import read_json
+from core.proxy.zyte_api import ZyteRequest, load
 
 class EbaySpider(scrapy.Spider):
     custom_settings = {
@@ -9,7 +10,6 @@ class EbaySpider(scrapy.Spider):
         'HTTPCACHE_ENABLED': False
     }
     name = "ebay"
-    start_urls = [f"https://www.ebay.co.uk/str/automationplanetuk?_ipg=200&_pgn={i}&_tab=shop&_ajax=itemFilter&_tabName=shop" for i in [49]]
     headers = {
         "accept": "*/*",
         "accept-encoding": "gzip, deflate, br, zstd",
@@ -18,7 +18,7 @@ class EbaySpider(scrapy.Spider):
         "dnt": "1",
         "pragma": "no-cache",
         "priority": "u=0, i",
-        "referer":"https://www.google.com",
+        "referer":"https://www.bing.com",
         "sec-ch-ua": "\"Google Chrome\";v=\"134\", \"Not=A?Brand\";v=\"8\", \"Chromium\";v=\"134\"",
         "sec-ch-ua-mobile": "?0",
         "sec-ch-ua-platform": "\"Linux\"",
@@ -26,41 +26,47 @@ class EbaySpider(scrapy.Spider):
         "sec-fetch-mode": "navigate",
         "sec-fetch-site": "same-origin",
         "sec-fetch-user": "?1",
-        "upgrade-insecure-requests": "1",
         "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"
     }
-    proxy = 'oxy_isp'
-    data = []
     done = []
 
     def start_requests(self):
-        for i in range(20):
-            for url in self.data:
-                yield scrapy.Request(
-                    url=url['url'],
-                    dont_filter=True,
-                    callback=self.parse_pdp,
-                    headers=self.headers,
-                    meta={'item': url,}
-            ) 
+        yield ZyteRequest(
+            url='https://www.ebay.co.uk/sch/i.html?_dkr=1&iconV2Request=true&_blrs=recall_filtering&_ssn=deals*heng&store_cat=0&store_name=dealsheng&_oac=1&rt=nc&_ipg=240&_pgn=1',
+            callback=self.parse,
+        ) 
 
     def parse(self, response):
-        data = response.json()
-        items = filter(lambda x: x['_type'] == 'CardContainer',data['modules']['LISTINGS_MODULE']['containers'])
-        items = list(items)[0]
-        for item in items['cards']:
-            yield scrapy.Request(
-                url=item['action']['URL'],
-                headers=self.headers,
-                callback=self.parse_pdp,
+        response = load(response)
+        products = response.css('.srp-results li .s-item__image')
+        for link in products:  
+            link = link.css('a::attr(href)').get()
+            if link not in self.done: 
+                self.done += [link]
+                yield ZyteRequest(
+                    url=link,
+                    callback=self.parse_pdp,
+                )
+        if next_page := response.css('.pagination__next::attr(href)').get():
+            yield ZyteRequest(
+                url=next_page,
+                callback=self.parse,
             )
 
-
     def parse_pdp(self, response):
-        item = response.meta['item']
-        if not remove_tags(response.css('.x-item-title__mainTitle').get('')) or response.url in self.done:
+        url = response.meta['url']
+        response = load(response)
+        if not remove_tags(response.css('.x-item-title__mainTitle').get('')):
+            print('error ', url)
             return
-        self.done += [response.url]
+        item = {}
+        image = response.css('.img-transition-medium img::attr(src)').get()
+        item['url'] = url
+        item['image'] = image
+        item['quantity'] = response.css('.x-quantity__availability  span::text').get()
+        item['name'] = remove_tags(response.css('.x-item-title__mainTitle').get())
+        item['price'] = response.css('.x-price-primary span::text').get()
+        item['condition'] = response.css('.x-item-condition-text .clipped::text').get()
         item['sold'] = response.xpath("//div[@id='qtyAvailability']//span[contains(text(), 'sold')]/text()").get()
         item['item specifics'] = remove_tags(response.css('.ux-layout-section--features').get(''))
         item['Product Identifiers'] = remove_tags(response.css('.ux-layout-section-evo.ux-layout-section--productIdentifiers').get(''))
