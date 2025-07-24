@@ -13,19 +13,23 @@ class SupertailsSpider(scrapy.Spider):
     def parse(self, response):
         cats = response.css('[data-parent="health-hygiene3"], [data-parent="clothing-accessories3"], [data-parent="collars-leashes-harnesses3"], [data-parent="grooming3"], [data-parent="dog-toys3"], [data-parent="treats-chews_image_https-cdn-shopify-com-s-files-1-0565-8021-0861-files-product_food_dog_mob_1_f58957c7-fd44-4533-abf6-fb2533ca2bd0-png-v-16446432063"], [data-parent="dog-food_image_-https-cdn-shopify-com-s-files-1-0565-8021-0861-files-product_food_dog_mob_1_f58957c7-fd44-4533-abf6-fb2533ca2bd0-png-v-16446432063"]')
         for cat in cats:
+            category_lev1 = ''.join(cat.css('::attr(data-parent)').get().replace('3','').split('-'))
             for cat2 in cat.css('ul > li a'):
+                category_lev2 = cat.css('::attr(data-label)').get()
                 slug = cat2.css('::attr(href)').get().split('/collections/')[-1].split('?')[0]
                 url = f'https://search.unbxd.io/78960c876fcf6b023ecb00405dac2866/ss-unbxd-prod-supertails43231684495044/category?p=category_handle_uFilter%3A%22{slug}%22&facet.multiselect=true&variants=true&variants.count=100&fields=compareAtPrice,price,computed_discount,availableForSaleOfVariants,uniqueId,productUrl,productType,totalInventory,title,availability,variantCount,imageUrl,tags,images,meta_display_label,v_price,v_computed_discount,v_compareAtPrice,v_availableForSale,v_weight,v_Size,v_imageUrl,v_weightUnit,variantId,vendor,vId,v_sku,skuId,meta_offer1,meta_offer2,meta_rating,meta_rating_count,meta_category,meta_sub_category,meta_pet_type,meta_category_l4,meta_category_l5,meta_app_only_product,meta_video_highlight,meta_sizechart_image&spellcheck=true&pagetype=boolean&rows=40&start=0&version=V2&viewType=Grid&facet.version=V2'
                 yield scrapy.Request(
                     url=url,
-                    callback=self.parse_products
+                    callback=self.parse_products,
+                    meta={'cat1':category_lev1, 'cat2':category_lev2}
                 )
 
-        for slug in ['puppy-corner', 'dog-medicines']:
+        for slug, cat1 in [('puppy-corner', 'puppy corner'), ('dog-medicines', 'dog medicines')]:
             url = f'https://search.unbxd.io/78960c876fcf6b023ecb00405dac2866/ss-unbxd-prod-supertails43231684495044/category?p=category_handle_uFilter%3A%22{slug}%22&facet.multiselect=true&variants=true&variants.count=100&fields=compareAtPrice,price,computed_discount,availableForSaleOfVariants,uniqueId,productUrl,productType,totalInventory,title,availability,variantCount,imageUrl,tags,images,meta_display_label,v_price,v_computed_discount,v_compareAtPrice,v_availableForSale,v_weight,v_Size,v_imageUrl,v_weightUnit,variantId,vendor,vId,v_sku,skuId,meta_offer1,meta_offer2,meta_rating,meta_rating_count,meta_category,meta_sub_category,meta_pet_type,meta_category_l4,meta_category_l5,meta_app_only_product,meta_video_highlight,meta_sizechart_image&spellcheck=true&pagetype=boolean&rows=40&start=0&version=V2&viewType=Grid&facet.version=V2'
             yield scrapy.Request(
                 url=url,
-                callback=self.parse_products
+                callback=self.parse_products,
+                meta={'cat1':category_lev1, 'cat2':category_lev2}
             )
 
     def parse_products(self, response):
@@ -35,14 +39,16 @@ class SupertailsSpider(scrapy.Spider):
                 url =f"https://supertails.com{variant['productUrl']}.json"
                 yield scrapy.Request(
                     url=url,
-                    callback=self.parse_pdp
+                    callback=self.parse_pdp,
+                    meta=response.meta
                 )
         if data['numberOfProducts']  > data['start']:
             url = furl(response.url)
             url.args['start'] = int(url.args['start']) + 40
             yield scrapy.Request(
                 url=url.url,
-                callback=self.parse_products
+                callback=self.parse_products,
+                meta=response.meta
             )
             
 
@@ -58,6 +64,8 @@ class SupertailsSpider(scrapy.Spider):
                 'weight/quantity': variant['title'],
                 'url': f"{response.url.replace('.json','')}?variant={variant['id']}",
                 'images': [image['src'] for image in product['images']],
+                'category 1':response.meta['cat1'],
+                'category 2':response.meta['cat2'],
                 'ingredients': ' '.join(ingredients)
             }
             if not images:
