@@ -4,8 +4,9 @@ import json
 from scrapy import Request, Selector
 
 class ZyteRequest(Request):
-    def __init__(self, url, *args, http_response_body=True, **kwargs):
+    def __init__(self, url, *args, http_response_body=True, meta={}, **kwargs):
         api_key = os.getenv("ZYTE_API")
+        api_key = '2f1f7213b2ec4f98922a854b64b363f8'
         if not api_key:
             raise ValueError("ZYTE_API environment variable not set")
 
@@ -30,7 +31,7 @@ class ZyteRequest(Request):
             method="POST",
             headers=headers,
             body=json.dumps(payload),
-            meta={'url': url},
+            meta={**meta,'url': url},
             dont_filter=True,  # Avoid duplicate filtering since it's proxied
             *args,
             **kwargs
