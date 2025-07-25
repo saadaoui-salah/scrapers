@@ -11,6 +11,8 @@ class HealthdirectSpider(scrapy.Spider):
     custom_settings = {
         'HTTPCACHE_ENABLED': True
     }
+    proxy='burp'
+
     def start_requests(self):
         import string
         alphabet = list(string.ascii_lowercase)
