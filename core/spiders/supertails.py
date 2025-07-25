@@ -105,6 +105,6 @@ class SupertailsSpider(scrapy.Spider):
 
     def parse_images(self, response):
         item = response.meta['item']
-        file_name = f"{item['id']}&{item['title'].replace(' ', '_')}"
+        file_name = f"{item['id']}&{item['title'].replace(' ', '_').replace('/','_')}"
         with open(f'./supertails-images/{file_name}.png', 'wb') as f:
             f.write(response.body)
