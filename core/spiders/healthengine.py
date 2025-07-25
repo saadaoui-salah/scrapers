@@ -77,7 +77,7 @@ class HealthengineSpider(scrapy.Spider):
         "IR_29590": "1747770500505|0|1747770500505||",
         "he_ga_ZVK7K6FDJP": "GS2.1.s1747769191$o1$g1$t1747770502$j55$l0$h0$d3LJF2-O4_9j0j-2GsulQ31s5e-yaYZcv2w"
     }
-    proxy='oxy_isp'
+    proxy='burp'
 
 
     def start_requests(self):
