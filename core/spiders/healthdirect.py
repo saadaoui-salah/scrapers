@@ -9,9 +9,11 @@ PARAMS = [
 class HealthdirectSpider(scrapy.Spider):
     name = "healthdirect"
     custom_settings = {
-        'HTTPCACHE_ENABLED': True
+        'HTTPCACHE_ENABLED': True,
+        'REFERER_ENABLED':False,
+        'COOKIES_ENABLED':False,
     }
-    proxy='burp'
+    proxy = 'burp'
 
     def start_requests(self):
         import string
