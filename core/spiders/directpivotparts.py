@@ -28,7 +28,7 @@ class DirectpivotpartsSpider(scrapy.Spider):
 
     def parse_pdp(self, response):
         cat = ' > '.join(response.css('[itemtype="https://schema.org/BreadcrumbList"] a span::text').getall()[1:])
-        variants = response.css('[class="flex flex-wrap gap-2 items-center"] a::attr(href)').getall()
+        variants = response.css('[class="flex flex-wrap gap-2 items-center"] a::attr(href), .dpp-select option::attr(data-url)').getall()
         if not variants:
             response.meta['cat'] = cat
             yield from self.parse_variant(response)
