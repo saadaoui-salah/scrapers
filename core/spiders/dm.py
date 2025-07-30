@@ -27,7 +27,7 @@ class DmSpider(scrapy.Spider):
     base_url = 'https://product-search.services.dmtech.com/de/search/static'
     params = [
         #('?query=trend%20it%20up&brandName=trend%20IT%20UP&brandName=trend%20!t%20up&pageSize=432&searchType=editorial-search&sort=editorial_relevance&type=search-static&currentPage=0', 'Trend it up'),
-        ('?brandName=alverde%20NATURKOSMETIK&brandName=alverde%20MEN&brandName=alverde%20BABY&pageSize=151&searchType=editorial-search&sort=editorial_relevance&type=search-static&categoryNames=Augen%20Make-up&categoryNames=Lippen%20Make-up&categoryNames=Make-up%20Entferner&categoryNames=Make-up%20Primer&categoryNames=Make-up%20Zubeh%C3%B6r&currentPage=0','Alverde Naturkosmetik'),
+        ('?purchasable=true&allCategories.id=010000&brandName=alverde%20NATURKOSMETIK&pageSize=225&searchType=editorial-search&sort=editorial_relevance&type=search-static&currentPage=0','Alverde Naturkosmetik'),
         #('?brandName=essence&pageSize=732&searchType=editorial-search&sort=editorial_relevance&type=search-static&currentPage=0','essence'),
         #('?brandName=ebelin&pageSize=638&searchType=editorial-search&sort=editorial_relevance&type=search-static&currentPage=0','ebelin'),
         #('?brandName=catrice&pageSize=632&searchType=editorial-search&sort=new&type=search-static&currentPage=0','catrice'),

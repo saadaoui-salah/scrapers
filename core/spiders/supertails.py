@@ -8,6 +8,9 @@ from uuid import uuid4
 class SupertailsSpider(scrapy.Spider):
     name = "supertails"
     start_urls = ["https://supertails.com"]
+    custom_settings = {
+        'DOWNLOAD_DELAY':0.3
+    }
     proxy = 'burp'
 
     def parse(self, response):

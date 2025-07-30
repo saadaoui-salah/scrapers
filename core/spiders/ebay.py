@@ -1,6 +1,6 @@
 import scrapy
 from w3lib.html import remove_tags
-#from core.utils.utils import read_json
+from core.utils.utils import csv_to_dict
 from core.proxy.zyte_api import ZyteRequest, load
 
 class EbaySpider(scrapy.Spider):
@@ -32,6 +32,7 @@ class EbaySpider(scrapy.Spider):
     done = []
 
     def start_requests(self):
+        self.done = [p['url'] for p in csv_to_dict('./client-data/ebay.csv')]
         for i in range(400):
             yield ZyteRequest(
                 url=f'https://www.ebay.co.uk/sch/i.html?_dkr=1&iconV2Request=true&_blrs=recall_filtering&_ssn=deals*heng&store_cat=0&store_name=dealsheng&_oac=1&rt=nc&_ipg=240&_pgn={i+1}',
