@@ -2788,58 +2788,81 @@ fragment Variant_abTests on ABTests {
   SPT_RENDER_FOR_SALE_PAGE: abTest(trial: "SPT_RENDER_FOR_SALE_PAGE")
 }
 """
-payload = {
-                "searchQueryState": {
-                    "pagination": {
-                        "currentPage": 1
-                    },
-                    "isMapVisible": True,
-                    "mapBounds": {
-                        "west": -81.47984554754879,
-                        "east": -81.44598534094479,
-                        "south": 28.31984241212324,
-                        "north": 28.3497591218273
-                    },
-                    "mapZoom": 15,
-                    "usersSearchTerm": "",
-                    "filterState": {
-                        "isForRent": {"value": True},
-                        "isForSaleByAgent": {"value": False},
-                        "isForSaleByOwner": {"value": False},
-                        "isNewConstruction": {"value": False},
-                        "isComingSoon": {"value": False},
-                        "isAuction": {"value": False},
-                        "isForSaleForeclosure": {"value": False}
-                    },
-                    "isListVisible": True
-                },
-                "wants": {
-                    "cat1": ["listResults", "mapResults"]
-                },
-                "requestId": 1,
-                "isDebugRequest": False
-            }
-
-payload = {
+p = [("For rent", {
     "searchQueryState": {
-        "pagination": {
-            "currentPage": 3
-        },
         "isMapVisible": True,
         "mapBounds": {
-            "west": -81.49965097891476,
-            "east": -81.43193056570675,
-            "south": 28.300409306577784,
-            "north": 28.36024524165079
+            "north": 28.454424054822432,
+            "south": 27.975219449853448,
+            "east": -81.23992996679686,
+            "west": -81.62719803320311
         },
-        "mapZoom": 14,
-        "usersSearchTerm": "",
+        "filterState": {
+            "isForRent": {
+                "value": True
+            },
+            "isForSaleByAgent": {
+                "value": False
+            },
+            "isForSaleByOwner": {
+                "value": False
+            },
+            "isNewConstruction": {
+                "value": False
+            },
+            "isComingSoon": {
+                "value": False
+            },
+            "isAuction": {
+                "value": False
+            },
+            "isForSaleForeclosure": {
+                "value": False
+            }
+        },
+        "isListVisible": True,
+        "mapZoom": 11,
+        "usersSearchTerm": "34746",
+        "regionSelection": [
+            {
+                "regionId": 73200,
+                "regionType": 7
+            }
+        ]
+    },
+    "wants": {
+        "cat1": [
+            "listResults",
+            "mapResults"
+        ]
+    },
+    "requestId": 9,
+    "isDebugRequest": False
+}),
+("for sale", {
+    "searchQueryState": {
+        "isMapVisible": True,
+        "mapBounds": {
+            "north": 28.454424054822432,
+            "south": 27.975219449853448,
+            "east": -81.23992996679686,
+            "west": -81.62719803320311
+        },
         "filterState": {
             "sortSelection": {
                 "value": "globalrelevanceex"
             }
         },
-        "isListVisible": True
+        "isListVisible": True,
+        "mapZoom": 11,
+        "usersSearchTerm": "Kissimmee FL 34746",
+        "regionSelection": [
+            {
+                "regionId": 73200,
+                "regionType": 7
+            }
+        ],
+        "pagination": {}
     },
     "wants": {
         "cat1": [
@@ -2850,9 +2873,63 @@ payload = {
             "total"
         ]
     },
-    "requestId": 4,
+    "requestId": 10,
     "isDebugRequest": False
-}
+}), ("Sold", {
+    "searchQueryState": {
+        "isMapVisible": True,
+        "mapBounds": {
+            "north": 28.454424054822432,
+            "south": 27.975219449853448,
+            "east": -81.23992996679686,
+            "west": -81.62719803320311
+        },
+        "filterState": {
+            "sortSelection": {
+                "value": "globalrelevanceex"
+            },
+            "isRecentlySold": {
+                "value": True
+            },
+            "isForSaleByAgent": {
+                "value": False
+            },
+            "isForSaleByOwner": {
+                "value": False
+            },
+            "isNewConstruction": {
+                "value": False
+            },
+            "isComingSoon": {
+                "value": False
+            },
+            "isAuction": {
+                "value": False
+            },
+            "isForSaleForeclosure": {
+                "value": False
+            }
+        },
+        "isListVisible": True,
+        "mapZoom": 11,
+        "usersSearchTerm": "Kissimmee FL 34746",
+        "regionSelection": [
+            {
+                "regionId": 73200,
+                "regionType": 7
+            }
+        ],
+        "pagination": {}
+    },
+    "wants": {
+        "cat1": [
+            "listResults",
+            "mapResults"
+        ]
+    },
+    "requestId": 13,
+    "isDebugRequest": False
+})]
 
 class ZillowSpider(scrapy.Spider):
     name = "zillow"
@@ -2877,69 +2954,23 @@ class ZillowSpider(scrapy.Spider):
 
     def start_requests(self):
         url = "https://www.zillow.com/async-create-search-page-state"
-        for i in range(20):
-            payload = {
-                "searchQueryState": {
-                    "pagination": {  "currentPage": i + 1},
-                    "isMapVisible": True,
-                    "mapBounds": {
-                        "west": -81.50402834402706,
-                        "east": -81.43630793081905,
-                        "south": 28.305787717554836,
-                        "north": 28.365620625013932
-                    },
-                    "mapZoom": 14,
-                    "usersSearchTerm": "",
-                    "filterState": {
-                        "sortSelection": {
-                            "value": "globalrelevanceex"
-                        },
-                        "isForSaleByAgent": {
-                            "value": False
-                        },
-                        "isForSaleByOwner": {
-                            "value": False
-                        },
-                        "isNewConstruction": {
-                            "value": False
-                        },
-                        "isComingSoon": {
-                            "value": False
-                        },
-                        "isAuction": {
-                            "value": False
-                        },
-                        "isForSaleForeclosure": {
-                            "value": False
-                        },
-                        "isRecentlySold": {
-                            "value": True
-                        }
-                    },
-                    "isListVisible": True
-                },
-                "wants": {
-                    "cat1": [
-                        "mapResults"
-                    ]
-                },
-                "requestId": i+1,
-                "isDebugRequest": False
-            }
+        for name, payload in p:
             
             yield scrapy.Request(
                 url=url,
                 method="PUT",
                 headers=self.headers,
                 body=json.dumps(payload),
-                callback=self.parse
+                callback=self.parse,
+                meta={'name':name, 'payload':payload, "first":True}
             )
 
     def parse(self, response):
         for listing in response.json()['cat1']['searchResults']['mapResults'] + response.json()['cat1']['searchResults']['listResults']:
             data = {
                 'address': listing['address'],
-                'zillow link': f"https://www.zillow.com{listing['detailUrl']}" if 'http' not in listing['detailUrl'] else listing['detailUrl']
+                'zillow link': f"https://www.zillow.com{listing['detailUrl']}" if 'http' not in listing['detailUrl'] else listing['detailUrl'],
+                'filter': response.meta['name']
             }
             try:
                 url = f"https://www.zillow.com/graphql/?zpid={listing['zpid']}&altId=&deviceType=desktop&deviceTypeV2=WEB_DESKTOP&useOmpV2=false&operationName=NotForSaleShopperPlatformFullRenderQuery"
@@ -2968,6 +2999,18 @@ class ZillowSpider(scrapy.Spider):
                 data['mailing address'] = 'N/A'
                 data['parcel number'] = 'N/A'
                 yield data
+        if response.meta.get('first'):
+          for i in range(response.json()['cat1']['searchList']['totalPages']):
+            payload = response.meta['payload']
+            payload['searchQueryState']['pagination'] = {'currentPage': i+2}
+            yield scrapy.Request(
+                url=url,
+                method="PUT",
+                headers=self.headers,
+                body=json.dumps(payload),
+                callback=self.parse,
+                meta={'name':response.meta['name']}
+            )
 
     def parse_details(self, response):
         item = response.meta['item']
