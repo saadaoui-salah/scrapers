@@ -164,7 +164,7 @@ class ReonomySpider(scrapy.Spider):
                         "data":meta['data']
                     }
                 )
-        else:
+        elif extra:
             for i in range(0, len(extra), batch_size):
                 batch = extra[i:i + batch_size]
                 body = json.dumps({"ids": batch})
@@ -177,6 +177,19 @@ class ReonomySpider(scrapy.Spider):
                     callback=self.parse_contacts,
                     meta=meta
                 )
+        else:
+            data = meta['data']
+            for i in range(5):
+                data[f'Owner {i} Name'] = '--'
+                data[f'Owner {i} Emails'] = '--'
+                data[f'Owner {i} Phone Numbers'] = '--'
+                data[f'Owner {i} Addresses'] = '--'
+            for i in range(50):
+                data[f'Additional Contacts {i} Name'] = '--'
+                data[f'Additional Contacts {i} Emails'] = '--'
+                data[f'Additional Contacts {i} Phone Numbers'] = '--'
+                data[f'Additional Contacts {i} Addresses'] = '--'
+            yield data
 
 
     def parse_contacts_ids(self, response):
@@ -198,7 +211,7 @@ class ReonomySpider(scrapy.Spider):
         data = meta['data']
         response = load(response)
         if extra := meta.get('extra'):
-            for i in range(4):
+            for i in range(5):
                 data[f'Owner {i} Name'] = '--'
                 data[f'Owner {i} Emails'] = '--'
                 data[f'Owner {i} Phone Numbers'] = '--'
