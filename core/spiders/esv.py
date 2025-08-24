@@ -42,6 +42,7 @@ class EsvSpider(scrapy.Spider):
 
     def parse_details(self, response):
         data = response.meta['data']
+        data['title'] = response.css('main > h3::text').get('').strip()
         data['address'] = remove_tags(response.css('address').get('')).strip()
         data['site internet'] = response.css('a.detail-link::attr(href)').get('')
         data['But'] = response.xpath("//h4[contains(., 'But')]/following-sibling::p[1]/text()").get('')
