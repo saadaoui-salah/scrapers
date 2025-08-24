@@ -1,5 +1,7 @@
 import scrapy
 from core.proxy.zyte_api import ZyteRequest, load
+from w3lib.html import remove_tags 
+
 
 class PokemonSpider(scrapy.Spider):
     name = "pokemon"
@@ -32,7 +34,7 @@ class PokemonSpider(scrapy.Spider):
             'Expansion':response.css('.stats-footer a::text').get(),
             'Pokemon':response.css('#pokedex-find span::text').get('').replace('Chercher ', '').replace(' dans le Pokédex', '').strip(),
             'Rarity':response.css('.stats-footer span::text').get('').split(' ')[-1],
-            'Card Type':response.css('.card-type h2::text').get(),
+            'Card Type':remove_tags(response.css('.card-type h2').get('')),
             'Pokemon Type':response.css('.card-basic-info .right i::attr(title)').get(),
             'Link': meta['url']
         }
