@@ -45,7 +45,7 @@ class ZyteRequest(Request):
             method="POST",
             headers=headers,
             body=json.dumps(payload),
-            meta={**meta,'url': url, 'http_handle_status':[400]},
+            meta={**meta,'url': url},
             dont_filter=True,
             callback=kwargs.get('callback')  # Avoid duplicate filtering since it's proxied
         )
