@@ -111,7 +111,16 @@ class ReonomySpider(scrapy.Spider):
                     'Reported Owner Address': item['reported_owner_address']  if item.get('reported_owner_address') else  '--',
                     'Link': f"https://app.reonomy.com/!/search/467ce1b7-0ab8-4b3e-9c43-2c678011b56d/property/{item['id']}/ownership"
                 }
-
+                for i in range(5):
+                    data[f'Owner {i} Name'] = '--'
+                    data[f'Owner {i} Emails'] = '--'
+                    data[f'Owner {i} Phone Numbers'] = '--'
+                    data[f'Owner {i} Addresses'] = '--'
+                for i in range(50):
+                    data[f'Additional Contacts {i} Name'] = '--'
+                    data[f'Additional Contacts {i} Emails'] = '--'
+                    data[f'Additional Contacts {i} Phone Numbers'] = '--'
+                    data[f'Additional Contacts {i} Addresses'] = '--'
 
                 url = f"https://api.reonomy.com/v3/property-contacts/{item['id']}"
         
@@ -179,16 +188,6 @@ class ReonomySpider(scrapy.Spider):
                 )
         else:
             data = meta['data']
-            for i in range(5):
-                data[f'Owner {i} Name'] = '--'
-                data[f'Owner {i} Emails'] = '--'
-                data[f'Owner {i} Phone Numbers'] = '--'
-                data[f'Owner {i} Addresses'] = '--'
-            for i in range(50):
-                data[f'Additional Contacts {i} Name'] = '--'
-                data[f'Additional Contacts {i} Emails'] = '--'
-                data[f'Additional Contacts {i} Phone Numbers'] = '--'
-                data[f'Additional Contacts {i} Addresses'] = '--'
             yield data
 
 
