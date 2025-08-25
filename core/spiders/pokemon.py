@@ -1,6 +1,7 @@
 import scrapy
 from core.proxy.zyte_api import ZyteRequest, load
 from w3lib.html import remove_tags
+from core.utils.utils import csv_to_dict
 
 class PokemonSpider(scrapy.Spider):
     name = "pokemon"
@@ -8,11 +9,19 @@ class PokemonSpider(scrapy.Spider):
     
     
     def start_requests(self):
-        for i in range(1232):
+        miissing = [item['Link'] for item in csv_to_dict('./client-data/pokemon.csv') if not item['Number']]
+        print(len(miissing))
+        #for i in range(1232):
+        #    yield ZyteRequest(
+        #        url=f"{self.url}&page={i+1}",
+        #        callback=self.parse_details,
+        #    )
+        for card in missing:
             yield ZyteRequest(
-                url=f"{self.url}&page={i+1}",
-                callback=self.parse,
+                url=card,
+                callback=self.parse_details,
             )
+
 
     def parse(self, response):
         response = load(response)
