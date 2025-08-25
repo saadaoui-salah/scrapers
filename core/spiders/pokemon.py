@@ -9,8 +9,7 @@ class PokemonSpider(scrapy.Spider):
     
     
     def start_requests(self):
-        miissing = [item['Link'] for item in csv_to_dict('./client-data/pokemon.csv') if not item['Number']]
-        print(len(miissing))
+        missing = [item['Link'] for item in csv_to_dict('./client-data/pokemon.csv') if not item['Number']]
         #for i in range(1232):
         #    yield ZyteRequest(
         #        url=f"{self.url}&page={i+1}",
